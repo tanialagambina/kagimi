@@ -41,12 +41,6 @@ export PYTHONPATH=$PWD/src
 python main.py
 ```
 
-- Or use the helper script which sets `PYTHONPATH` for you:
-
-```bash
-bash scripts/run.sh
-```
-
 Notes
 
 - `main.py` fetches units and writes CSV/SQLite snapshots in `out/`.
