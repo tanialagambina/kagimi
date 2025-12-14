@@ -1,5 +1,7 @@
 import sqlite3
 from pathlib import Path
+from src.emailer import send_email
+
 
 # --------------------------------------------------
 # CONFIG
@@ -83,57 +85,58 @@ def compare_snapshots(latest, previous):
 # OUTPUT
 # --------------------------------------------------
 
-def print_alerts(
-    latest_dt: str,
-    previous_dt: str,
+def build_alert_message(
+    latest_dt,
+    previous_dt,
     latest,
     previous,
     new_units,
     removed_units,
     price_changes,
-):
-    print("\n================ HMLET ALERTS ================\n")
-    print("Comparing snapshots:")
-    print(f"  Previous run: {previous_dt}")
-    print(f"  Latest run:   {latest_dt}\n")
+) -> str:
+    lines = []
+
+    lines.append("HMLET ALERTS\n")
+    lines.append(f"Previous run: {previous_dt}")
+    lines.append(f"Latest run:   {latest_dt}\n")
 
     if new_units:
-        print("🆕 NEW UNITS")
-        for uid in sorted(new_units):
+        lines.append("🆕 NEW UNITS")
+        for uid in new_units:
             u = latest[uid]
-            print(
-                f"  + {u['property_name_en']} | {u['layout']} | "
+            lines.append(
+                f"+ {u['property_name_en']} | {u['layout']} | "
                 f"{u['city_en']} | ¥{u['price_jpy']:,}"
             )
-        print()
+        lines.append("")
 
     if removed_units:
-        print("❌ REMOVED UNITS")
-        for uid in sorted(removed_units):
+        lines.append("❌ REMOVED UNITS")
+        for uid in removed_units:
             u = previous[uid]
-            print(
-                f"  - {u['property_name_en']} | {u['layout']} | "
+            lines.append(
+                f"- {u['property_name_en']} | {u['layout']} | "
                 f"{u['city_en']} | ¥{u['price_jpy']:,}"
             )
-        print()
+        lines.append("")
 
     if price_changes:
-        print("💰 PRICE CHANGES")
-        for uid in sorted(price_changes):
+        lines.append("💰 PRICE CHANGES")
+        for uid in price_changes:
             l = latest[uid]
             p = previous[uid]
-            diff = l["price_jpy"] - p["price_jpy"]
-            arrow = "⬆️" if diff > 0 else "⬇️"
-            print(
-                f"  {arrow} {l['property_name_en']} | {l['layout']} | "
+            arrow = "⬆️" if l["price_jpy"] > p["price_jpy"] else "⬇️"
+            lines.append(
+                f"{arrow} {l['property_name_en']} | "
                 f"¥{p['price_jpy']:,} → ¥{l['price_jpy']:,}"
             )
-        print()
+        lines.append("")
 
     if not (new_units or removed_units or price_changes):
-        print("✅ No changes detected")
+        lines.append("✅ No changes detected")
 
-    print("\n=============================================\n")
+    return "\n".join(lines)
+
 
 # --------------------------------------------------
 # MAIN
@@ -160,7 +163,7 @@ def main():
         latest, previous
     )
 
-    print_alerts(
+    message = build_alert_message(
         latest_dt,
         previous_dt,
         latest,
@@ -170,7 +173,16 @@ def main():
         price_changes,
     )
 
+    print(message)
+
+    if new_units or removed_units or price_changes:
+        send_email(
+            subject="🏠 Hmlet property update",
+            body=message,
+        )
+        
     conn.close()
+
 
 
 if __name__ == "__main__":
