@@ -1,6 +1,9 @@
 import smtplib
 import os
 from email.message import EmailMessage
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 def send_email(subject: str, body: str):
