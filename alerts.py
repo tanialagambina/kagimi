@@ -51,7 +51,8 @@ def fetch_units_for_snapshot(conn, snapshot_datetime: str):
             s.earliest_move_in_datetime,
             u.property_name_en,
             u.layout,
-            u.city_en
+            u.city_en,
+            u.size_square_meters
         FROM availability_snapshots s
         JOIN units u ON u.unit_id = s.unit_id
         WHERE s.snapshot_datetime = ?
@@ -102,32 +103,35 @@ def build_alert_message(
 
     if new_units:
         lines.append("🆕 NEW UNITS")
-        for uid in new_units:
+        for uid in sorted(new_units):
             u = latest[uid]
             lines.append(
                 f"+ {u['property_name_en']} | {u['layout']} | "
+                f"{u['size_square_meters']} m² | "
                 f"{u['city_en']} | ¥{u['price_jpy']:,}"
             )
         lines.append("")
 
     if removed_units:
         lines.append("❌ REMOVED UNITS")
-        for uid in removed_units:
+        for uid in sorted(removed_units):
             u = previous[uid]
             lines.append(
                 f"- {u['property_name_en']} | {u['layout']} | "
+                f"{u['size_square_meters']} m² | "
                 f"{u['city_en']} | ¥{u['price_jpy']:,}"
             )
         lines.append("")
 
     if price_changes:
         lines.append("💰 PRICE CHANGES")
-        for uid in price_changes:
+        for uid in sorted(price_changes):
             l = latest[uid]
             p = previous[uid]
             arrow = "⬆️" if l["price_jpy"] > p["price_jpy"] else "⬇️"
             lines.append(
-                f"{arrow} {l['property_name_en']} | "
+                f"{arrow} {l['property_name_en']} | {l['layout']} | "
+                f"{l['size_square_meters']} m² | "
                 f"¥{p['price_jpy']:,} → ¥{l['price_jpy']:,}"
             )
         lines.append("")
@@ -180,9 +184,8 @@ def main():
             subject="🏠 Hmlet property update",
             body=message,
         )
-        
-    conn.close()
 
+    conn.close()
 
 
 if __name__ == "__main__":
