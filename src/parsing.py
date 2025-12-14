@@ -12,6 +12,14 @@ def parse_lat_lon(wkt: str) -> Tuple[float | None, float | None]:
 
 
 def parse_date_to_datetime(value: str | None) -> str | None:
+    """
+    Docstring for parse_date_to_datetime
+    
+    :param value: Description
+    :type value: str | None
+    :return: Description
+    :rtype: str | None
+    """
     if not value:
         return None
     return datetime.fromisoformat(value).isoformat()

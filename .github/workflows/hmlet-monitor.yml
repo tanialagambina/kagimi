@@ -1,50 +1,50 @@
 name: Hmlet Monitor
 
 on:
-  schedule:
-    - cron: "0 8 * * *"   # daily 08:00 UTC (adjust if you want)
-  workflow_dispatch:       # allows manual runs from GitHub UI
+    schedule:
+        - cron: "0 8 * * *" # daily 08:00 UTC (adjust if you want)
+    workflow_dispatch: # allows manual runs from GitHub UI
 
 jobs:
-  run-monitor:
-    runs-on: ubuntu-latest
+    run-monitor:
+        runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
+        steps:
+            - name: Checkout repo
+              uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
+            - name: Set up Python
+              uses: actions/setup-python@v5
+              with:
+                  python-version: "3.11"
 
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
+            - name: Install dependencies
+              run: |
+                  python -m pip install --upgrade pip
+                  pip install -r requirements.txt
 
-      # 1) RESTORE the sqlite DB from cache (if it exists)
-      - name: Restore SQLite cache
-        uses: actions/cache@v4
-        with:
-          path: out/hmlet_units.sqlite
-          key: hmlet-sqlite-db-v1
-          restore-keys: |
-            hmlet-sqlite-db-v1
+            # 1) RESTORE the sqlite DB from cache (if it exists)
+            - name: Restore SQLite cache
+              uses: actions/cache@v4
+              with:
+                  path: out/hmlet_units.sqlite
+                  key: hmlet-sqlite-db-v1
+                  restore-keys: |
+                      hmlet-sqlite-db-v1
 
-      - name: Run scraper (writes/updates sqlite + csv)
-        run: python src/main.py
+            - name: Run scraper
+              run: python -m src.main
 
-      - name: Run alerts (compares last two snapshots)
-        run: python src/alerts.py
+            - name: Run alerts
+              run: python -m src.alerts
 
-      # 2) SAVE the sqlite DB back to cache (always)
-      # We do this by caching the whole out/ folder with a "rolling" key per run.
-      - name: Save SQLite cache
-        if: always()
-        uses: actions/cache@v4
-        with:
-          path: out/hmlet_units.sqlite
-          key: hmlet-sqlite-db-v1-${{ github.run_id }}
-          restore-keys: |
-            hmlet-sqlite-db-v1
+            # 2) SAVE the sqlite DB back to cache (always)
+            # We do this by caching the whole out/ folder with a "rolling" key per run.
+            - name: Save SQLite cache
+              if: always()
+              uses: actions/cache@v4
+              with:
+                  path: out/hmlet_units.sqlite
+                  key: hmlet-sqlite-db-v1-${{ github.run_id }}
+                  restore-keys: |
+                      hmlet-sqlite-db-v1
