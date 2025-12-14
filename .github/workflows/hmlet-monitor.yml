@@ -2,8 +2,8 @@ name: Hmlet Monitor
 
 on:
     schedule:
-        - cron: "0 8 * * *" # daily 08:00 UTC (adjust if you want)
-    workflow_dispatch: # allows manual runs from GitHub UI
+        - cron: "0 8 * * *" # daily 08:00 UTC
+    workflow_dispatch:
 
 jobs:
     run-monitor:
@@ -33,13 +33,16 @@ jobs:
                       hmlet-sqlite-db-v1
 
             - name: Run scraper
-              run: python -m src.main
+              run: |
+                  export PYTHONPATH=$PYTHONPATH:$(pwd)
+                  python -m src.main
 
             - name: Run alerts
-              run: python -m src.alerts
+              run: |
+                  export PYTHONPATH=$PYTHONPATH:$(pwd)
+                  python -m src.alerts
 
             # 2) SAVE the sqlite DB back to cache (always)
-            # We do this by caching the whole out/ folder with a "rolling" key per run.
             - name: Save SQLite cache
               if: always()
               uses: actions/cache@v4
