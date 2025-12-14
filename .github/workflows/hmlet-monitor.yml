@@ -23,7 +23,7 @@ jobs:
                   python -m pip install --upgrade pip
                   pip install -r requirements.txt
 
-            # 1) RESTORE the sqlite DB from cache (if it exists)
+            # Restore sqlite DB from cache
             - name: Restore SQLite cache
               uses: actions/cache@v4
               with:
@@ -34,15 +34,15 @@ jobs:
 
             - name: Run scraper
               run: |
-                  export PYTHONPATH=$PYTHONPATH:$(pwd)
-                  python -m src.main
+                  export PYTHONPATH=$(pwd)
+                  python main.py
 
             - name: Run alerts
               run: |
-                  export PYTHONPATH=$PYTHONPATH:$(pwd)
-                  python -m src.alerts
+                  export PYTHONPATH=$(pwd)
+                  python alerts.py
 
-            # 2) SAVE the sqlite DB back to cache (always)
+            # Save sqlite DB back to cache
             - name: Save SQLite cache
               if: always()
               uses: actions/cache@v4

@@ -3,6 +3,14 @@ from typing import Tuple
 
 
 def parse_lat_lon(wkt: str) -> Tuple[float | None, float | None]:
+    """
+    Docstring for parse_lat_lon
+    
+    :param wkt: Description
+    :type wkt: str
+    :return: Description
+    :rtype: Tuple[float | None, float | None]
+    """
     try:
         inner = wkt.replace("POINT(", "").replace(")", "")
         lat, lon = map(float, inner.split())
