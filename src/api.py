@@ -1,12 +1,20 @@
+from typing import Dict, List
 import time
 import random
 import requests
-from typing import Dict, List
 
 from .config import API_URL, FILTERS, PAGINATION, HEADERS, REQUEST_BEHAVIOUR
 
 
 def build_params(offset: int) -> Dict:
+    """
+    Docstring for build_params
+    
+    :param offset: Description
+    :type offset: int
+    :return: Description
+    :rtype: Dict
+    """
     return {
         "layouts": ",".join(FILTERS["layouts"]),
         "check_in": FILTERS["check_in"],
@@ -20,6 +28,14 @@ def build_params(offset: int) -> Dict:
 
 
 def fetch_units_page(offset: int) -> Dict:
+    """
+    Docstring for fetch_units_page
+    
+    :param offset: Description
+    :type offset: int
+    :return: Description
+    :rtype: Dict
+    """
     r = requests.get(
         API_URL,
         params=build_params(offset),
@@ -31,6 +47,9 @@ def fetch_units_page(offset: int) -> Dict:
 
 
 def polite_sleep():
+    """
+    Docstring for polite_sleep
+    """
     time.sleep(
         random.uniform(
             REQUEST_BEHAVIOUR["min_delay_sec"],
@@ -40,6 +59,12 @@ def polite_sleep():
 
 
 def fetch_all_units() -> List[Dict]:
+    """
+    Docstring for fetch_all_units
+    
+    :return: Description
+    :rtype: List[Dict]
+    """
     all_units = {}
     offset = PAGINATION["start_offset"]
 

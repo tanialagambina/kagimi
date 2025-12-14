@@ -1,4 +1,4 @@
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 from pathlib import Path
 
 API_URL = "https://ywzjnepacv.ap-northeast-1.awsapprunner.com/v1/units"
@@ -27,13 +27,15 @@ REQUEST_BEHAVIOUR = {
     "max_delay_sec": 2.5,
 }
 
+SNAPSHOT_DATETIME = datetime.now(timezone.utc).isoformat(timespec="seconds")
+
+OUTPUT_DIR = Path("out")
+OUTPUT_DIR.mkdir(exist_ok=True)
 TODAY_DATE = date.today()
 TODAY_DATETIME = datetime.combine(
     TODAY_DATE, datetime.min.time()
 ).isoformat()
 
-OUTPUT_DIR = Path("out")
-OUTPUT_DIR.mkdir(exist_ok=True)
 
 OUTPUT_CSV = OUTPUT_DIR / f"hmlet_units_{TODAY_DATE.isoformat()}.csv"
 DB_PATH = OUTPUT_DIR / "hmlet_units.sqlite"

@@ -1,8 +1,9 @@
 import sqlite3
 from typing import List, Dict
 
-from src.config import DB_PATH, TODAY_DATETIME
+from src.config import DB_PATH, SNAPSHOT_DATETIME
 from src.parsing import parse_lat_lon, parse_date_to_datetime
+
 
 
 def get_connection():
@@ -100,7 +101,7 @@ def upsert_snapshots(conn: sqlite3.Connection, units: List[Dict]):
 
     rows = [
         (
-            TODAY_DATETIME,
+            SNAPSHOT_DATETIME,
             u["unit_id"],
             u["list_price"],
             parse_date_to_datetime(u.get("earliest_move_in_date")),
