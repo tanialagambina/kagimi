@@ -1,20 +1,44 @@
-from datetime import date, datetime, timezone
+from datetime import date, datetime, timezone, timedelta
 from pathlib import Path
 
 API_URL = "https://ywzjnepacv.ap-northeast-1.awsapprunner.com/v1/units"
 
 FILTERS = {
     "layouts": [
-        "1DK", "1LDK", "1LDKS",
-        "2K", "2DK", "2LDK",
-        "3DK", "3LDK",
+        "1LDK","2LDK","3LDK",
     ],
-    "check_in": "2026-09-29",
-    "check_out": "2027-03-28",
     "min_price": 95_000,
     "max_price": 380_000,
     "gcc_id": 101,
+    "size_square_meters_min": 38,
+    "size_square_meters_max": None,
 }
+
+
+MAIN_CHECK_IN = date.fromisoformat("2026-09-29")
+CHECK_OUT = "2027-03-28"
+
+SUGGESTION_WINDOW_DAYS = 14  # 2 weeks
+
+QUERIES = []
+
+# Primary query
+QUERIES.append({
+    "name": "main",
+    "check_in": MAIN_CHECK_IN.isoformat(),
+    "check_out": CHECK_OUT,
+    "is_primary": True,
+})
+
+# Secondary queries: day -1 to day -14
+for delta in range(1, SUGGESTION_WINDOW_DAYS + 1):
+    d = MAIN_CHECK_IN - timedelta(days=delta)
+    QUERIES.append({
+        "name": f"minus_{delta}_days",
+        "check_in": d.isoformat(),
+        "check_out": CHECK_OUT,
+        "is_primary": False,
+    })
 
 PAGINATION = {
     "limit": 12,
