@@ -1,6 +1,5 @@
 import sqlite3
 from pathlib import Path
-from datetime import date
 from src.emailer import send_email
 
 
@@ -9,6 +8,17 @@ from src.emailer import send_email
 # --------------------------------------------------
 
 DB_PATH = Path("out/hmlet_units.sqlite")
+
+
+# --------------------------------------------------
+# URL HELPERS
+# --------------------------------------------------
+
+def build_unit_url(property_id: int, unit_id: int, check_in: str, check_out: str) -> str:
+    return (
+        f"https://hmlet.com/en/property/{property_id}/units/{unit_id}/detail"
+        f"?check_in={check_in}&check_out={check_out}"
+    )
 
 
 # --------------------------------------------------
@@ -28,7 +38,7 @@ def get_primary_query(conn):
     """
     return conn.execute(
         """
-        SELECT query_id, check_in_date
+        SELECT query_id, check_in_date, check_out_date
         FROM queries
         WHERE is_primary = 1
         """
@@ -63,6 +73,7 @@ def fetch_units_for_snapshot(conn, snapshot_datetime: str, query_id: int):
         SELECT
             s.unit_id,
             s.price_jpy,
+            u.property_id,
             u.property_name_en,
             u.layout,
             u.city_en,
@@ -80,13 +91,15 @@ def fetch_units_for_snapshot(conn, snapshot_datetime: str, query_id: int):
 
 def fetch_secondary_only_units(conn, snapshot_datetime: str, primary_query_id: int):
     """
-    One row per unit:
-    closest (latest) check-in date before the main date
+    Returns ONE row per unit:
+    the closest (latest) secondary check-in date (via MAX) where the unit is available
+    but it is NOT in the primary query results.
     """
     return conn.execute(
         """
         SELECT
             s.unit_id,
+            u.property_id,
             u.property_name_en,
             u.layout,
             u.city_en,
@@ -137,19 +150,18 @@ def compare_snapshots(latest, previous):
 # --------------------------------------------------
 
 def build_alert_message(
-    latest_dt,
-    previous_dt,
-    primary_check_in: str,
-    latest,
-    previous,
-    new_units,
-    removed_units,
-    price_changes,
+    latest_dt: str,
+    previous_dt: str,
+    latest: dict,
+    previous: dict,
+    new_units: set,
+    removed_units: set,
+    price_changes: list,
     suggestions,
+    primary_check_in: str,
+    primary_check_out: str,
 ) -> str:
     lines = []
-
-    primary_date = date.fromisoformat(primary_check_in)
 
     lines.append("HMLET ALERTS\n")
     lines.append(f"Previous run: {previous_dt}")
@@ -163,10 +175,17 @@ def build_alert_message(
         lines.append("🆕 NEW UNITS (Main search)")
         for uid in sorted(new_units):
             u = latest[uid]
+            url = build_unit_url(
+                property_id=u["property_id"],
+                unit_id=uid,
+                check_in=primary_check_in,
+                check_out=primary_check_out,
+            )
             lines.append(
                 f"+ [Unit {uid}] {u['property_name_en']} | {u['layout']} | "
                 f"{u['size_square_meters']} m² | {u['city_en']} | "
-                f"¥{u['price_jpy']:,}"
+                f"¥{u['price_jpy']:,}\n"
+                f"  {url}"
             )
         lines.append("")
 
@@ -174,10 +193,17 @@ def build_alert_message(
         lines.append("❌ REMOVED UNITS (Main search)")
         for uid in sorted(removed_units):
             u = previous[uid]
+            url = build_unit_url(
+                property_id=u["property_id"],
+                unit_id=uid,
+                check_in=primary_check_in,
+                check_out=primary_check_out,
+            )
             lines.append(
                 f"- [Unit {uid}] {u['property_name_en']} | {u['layout']} | "
                 f"{u['size_square_meters']} m² | {u['city_en']} | "
-                f"¥{u['price_jpy']:,}"
+                f"¥{u['price_jpy']:,}\n"
+                f"  {url}"
             )
         lines.append("")
 
@@ -186,11 +212,19 @@ def build_alert_message(
         for uid in sorted(price_changes):
             l = latest[uid]
             p = previous[uid]
-            arrow = "⬆️" if l["price_jpy"] > p["price_jpy"] else "⬇️"
+            diff = l["price_jpy"] - p["price_jpy"]
+            arrow = "⬆️" if diff > 0 else "⬇️"
+            url = build_unit_url(
+                property_id=l["property_id"],
+                unit_id=uid,
+                check_in=primary_check_in,
+                check_out=primary_check_out,
+            )
             lines.append(
                 f"{arrow} [Unit {uid}] {l['property_name_en']} | {l['layout']} | "
                 f"{l['size_square_meters']} m² | "
-                f"¥{p['price_jpy']:,} → ¥{l['price_jpy']:,}"
+                f"¥{p['price_jpy']:,} → ¥{l['price_jpy']:,}\n"
+                f"  {url}"
             )
         lines.append("")
 
@@ -203,19 +237,24 @@ def build_alert_message(
         lines.append("💡 HAVE YOU ALSO CONSIDERED…")
         lines.append(
             "These homes aren’t available for your main dates,\n"
-            "but WOULD be if you moved in slightly earlier:\n"
+            "but WOULD be if you moved in slightly differently.\n"
+            "For each unit, this shows the *latest* move-in date we found (closest to your main date):\n"
         )
 
         for s in suggestions:
-            suggestion_date = date.fromisoformat(s["check_in_date"])
-            days_earlier = (primary_date - suggestion_date).days
-
+            suggested_check_in = s["check_in_date"]  # MAX() from SQL
+            url = build_unit_url(
+                property_id=s["property_id"],
+                unit_id=s["unit_id"],
+                check_in=suggested_check_in,
+                check_out=primary_check_out,
+            )
             lines.append(
                 f"+ [Unit {s['unit_id']}] {s['property_name_en']} | {s['layout']} | "
                 f"{s['size_square_meters']} m² | {s['city_en']} | "
                 f"¥{s['price_jpy']:,}\n"
-                f"  → Available if you moved in on {s['check_in_date']} "
-                f"({days_earlier} days earlier)"
+                f"  → Available if you moved in on {suggested_check_in}\n"
+                f"  {url}"
             )
 
         lines.append("")
@@ -245,6 +284,7 @@ def main():
 
     primary_query_id = primary["query_id"]
     primary_check_in = primary["check_in_date"]
+    primary_check_out = primary["check_out_date"]
 
     latest_dt, previous_dt = get_last_two_snapshots(conn)
     if not latest_dt or not previous_dt:
@@ -255,24 +295,21 @@ def main():
     latest = fetch_units_for_snapshot(conn, latest_dt, primary_query_id)
     previous = fetch_units_for_snapshot(conn, previous_dt, primary_query_id)
 
-    new_units, removed_units, price_changes = compare_snapshots(
-        latest, previous
-    )
+    new_units, removed_units, price_changes = compare_snapshots(latest, previous)
 
-    suggestions = fetch_secondary_only_units(
-        conn, latest_dt, primary_query_id
-    )
+    suggestions = fetch_secondary_only_units(conn, latest_dt, primary_query_id)
 
     message = build_alert_message(
-        latest_dt,
-        previous_dt,
-        primary_check_in,
-        latest,
-        previous,
-        new_units,
-        removed_units,
-        price_changes,
-        suggestions,
+        latest_dt=latest_dt,
+        previous_dt=previous_dt,
+        latest=latest,
+        previous=previous,
+        new_units=new_units,
+        removed_units=removed_units,
+        price_changes=price_changes,
+        suggestions=suggestions,
+        primary_check_in=primary_check_in,
+        primary_check_out=primary_check_out,
     )
 
     print(message)
