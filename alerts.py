@@ -234,11 +234,11 @@ def build_alert_message(
     # ---------------- SECONDARY QUERY SUGGESTIONS ----------------
 
     if suggestions:
-        lines.append("💡 HAVE YOU ALSO CONSIDERED…")
+        lines.append("💡 Have you also considered…")
         lines.append(
-            "These homes aren’t available for your main dates,\n"
-            "but WOULD be if you moved in slightly differently.\n"
-            "For each unit, this shows the *latest* move-in date we found (closest to your main date):\n"
+            "These homes aren’t available for your selected move in date,\n"
+            "but would be if you started your lease slightly earlier.\n"
+            "For each unit, this is the *latest* move-in date we found (closest to your main date):\n"
         )
 
         for s in suggestions:
