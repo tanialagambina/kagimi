@@ -1,7 +1,8 @@
 
-# Kagimi
+# kagimi 
+# かぎみ
 
-Minimal tooling and scripts for scraping and snapshotting property listings.
+Scraping and snapshotting property listings.
 
 Quick start
 
@@ -32,24 +33,11 @@ python main.py
 python alerts.py
 ```
 
-Bash-friendly options
-
-- Run with repository `src/` importable (no install):
-
-```bash
-export PYTHONPATH=$PWD/src
-python main.py
-```
-
 Notes
 
 - `main.py` fetches units and writes CSV/SQLite snapshots in `out/`.
 - `alerts.py` compares the latest snapshot with the previous one and prints alerts.
-- If you prefer, install the project in editable mode so package imports work without `PYTHONPATH`:
 
-```bash
-pip install -e .
-```
 
 Automation
 
