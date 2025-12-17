@@ -1,5 +1,6 @@
 import sqlite3
 from pathlib import Path
+from datetime import date
 from src.emailer import send_email
 
 
@@ -19,6 +20,14 @@ def build_unit_url(property_id: int, unit_id: int, check_in: str, check_out: str
         f"https://hmlet.com/en/property/{property_id}/units/{unit_id}/detail"
         f"?check_in={check_in}&check_out={check_out}"
     )
+
+def days_earlier(primary_check_in: str, suggested_check_in: str) -> int:
+    """
+    Returns how many days earlier the suggested date is vs the primary date.
+    """
+    primary = date.fromisoformat(primary_check_in)
+    suggested = date.fromisoformat(suggested_check_in)
+    return (primary - suggested).days
 
 
 # --------------------------------------------------
@@ -123,6 +132,41 @@ def fetch_secondary_only_units(conn, snapshot_datetime: str, primary_query_id: i
         (snapshot_datetime, snapshot_datetime, primary_query_id),
     ).fetchall()
 
+def fetch_secondary_only_units_for_snapshot(
+    conn,
+    snapshot_datetime: str,
+    primary_query_id: int,
+):
+    """
+    Secondary-query units NOT in primary query for a given snapshot.
+    One row per unit, using latest possible check-in date.
+    """
+    return conn.execute(
+        """
+        SELECT
+            s.unit_id,
+            u.property_id,
+            u.property_name_en,
+            u.layout,
+            u.city_en,
+            u.size_square_meters,
+            s.price_jpy,
+            MAX(q.check_in_date) AS check_in_date
+        FROM availability_snapshots s
+        JOIN units u ON u.unit_id = s.unit_id
+        JOIN queries q ON q.query_id = s.query_id
+        WHERE s.snapshot_datetime = ?
+          AND q.is_primary = 0
+          AND s.unit_id NOT IN (
+              SELECT unit_id
+              FROM availability_snapshots
+              WHERE snapshot_datetime = ?
+                AND query_id = ?
+          )
+        GROUP BY s.unit_id
+        """,
+        (snapshot_datetime, snapshot_datetime, primary_query_id),
+    ).fetchall()
 
 # --------------------------------------------------
 # DIFF LOGIC
@@ -144,6 +188,18 @@ def compare_snapshots(latest, previous):
 
     return new_units, removed_units, price_changes
 
+def diff_suggestions(latest_rows, previous_rows):
+    """
+    Return only NEW secondary-query suggestions
+    """
+    latest_by_id = {row["unit_id"]: row for row in latest_rows}
+    previous_ids = {row["unit_id"] for row in previous_rows}
+
+    return [
+        row
+        for uid, row in latest_by_id.items()
+        if uid not in previous_ids
+    ]
 
 # --------------------------------------------------
 # OUTPUT
@@ -236,9 +292,9 @@ def build_alert_message(
     if suggestions:
         lines.append("💡 Have you also considered…")
         lines.append(
-            "These homes aren’t available for your selected move in date,\n"
-            "but would be if you started your lease slightly earlier.\n"
-            "For each unit, this is the *latest* move-in date we found (closest to your main date):\n"
+            "These homes aren’t available for your selected move in date, "
+            "but have just become available if you started your lease slightly earlier.\n"
+            "For each unit, this is the latest move-in date we found (closest to your main date):\n"
         )
 
         for s in suggestions:
@@ -249,18 +305,18 @@ def build_alert_message(
                 check_in=suggested_check_in,
                 check_out=primary_check_out,
             )
+            delta_days = days_earlier(primary_check_in, suggested_check_in)
+
             lines.append(
                 f"+ [Unit {s['unit_id']}] {s['property_name_en']} | {s['layout']} | "
                 f"{s['size_square_meters']} m² | {s['city_en']} | "
                 f"¥{s['price_jpy']:,}\n"
-                f"  → Available if you moved in on {suggested_check_in}\n"
-                f"  {url}"
+                f"  → Available if you moved in {delta_days} days earlier "
+                f"(on {suggested_check_in})\n"
+                f"  👀➡️ {url}\n"
             )
 
         lines.append("")
-
-    if not main_query_changed and not suggestions:
-        lines.append("ℹ️ No changes detected across any searches")
 
     return "\n".join(lines)
 
@@ -297,7 +353,19 @@ def main():
 
     new_units, removed_units, price_changes = compare_snapshots(latest, previous)
 
-    suggestions = fetch_secondary_only_units(conn, latest_dt, primary_query_id)
+    latest_suggestions = fetch_secondary_only_units_for_snapshot(
+    conn, latest_dt, primary_query_id
+    )
+
+    previous_suggestions = fetch_secondary_only_units_for_snapshot(
+        conn, previous_dt, primary_query_id
+    )
+
+    suggestions = diff_suggestions(
+        latest_suggestions,
+        previous_suggestions,
+    )
+
 
     message = build_alert_message(
         latest_dt=latest_dt,
