@@ -1,6 +1,5 @@
 
-# kagimi 
-# かぎみ
+# kagimi • かぎみ
 
 Scraping and snapshotting property listings.
 
