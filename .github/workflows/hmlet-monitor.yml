@@ -24,14 +24,12 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      # 1) RESTORE sqlite DB (NEW schema version)
+      # RESTORE the rolling sqlite DB
       - name: Restore SQLite cache
         uses: actions/cache@v4
         with:
           path: out/hmlet_units.sqlite
           key: hmlet-sqlite-db-v1
-          restore-keys: |
-            hmlet-sqlite-db-v1
 
       - name: Run scraper
         run: |
@@ -47,12 +45,10 @@ jobs:
           export PYTHONPATH=$(pwd)
           python alerts.py
 
-      # 2) SAVE sqlite DB back to cache
+      # SAVE (overwrite) the same cache key
       - name: Save SQLite cache
         if: always()
         uses: actions/cache@v4
         with:
           path: out/hmlet_units.sqlite
-          key: hmlet-sqlite-db-v1-${{ github.run_id }}
-          restore-keys: |
-            hmlet-sqlite-db-v1
+          key: hmlet-sqlite-db-v1
