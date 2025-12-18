@@ -2,8 +2,8 @@ name: Hmlet Monitor
 
 on:
   schedule:
-    - cron: "0 7 * * *"    # daily 07:00 UTC
-    - cron: "0 11 * * *"   # daily 11:00 UTC
+    - cron: "0 7 * * *"
+    - cron: "0 11 * * *"
   workflow_dispatch:
 
 jobs:
@@ -24,12 +24,14 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      # RESTORE the rolling sqlite DB
+      # 1️⃣ RESTORE latest cache
       - name: Restore SQLite cache
         uses: actions/cache@v4
         with:
           path: out/hmlet_units.sqlite
-          key: hmlet-sqlite-db-v1
+          key: hmlet-sqlite-db-${{ github.run_id }}
+          restore-keys: |
+            hmlet-sqlite-db-
 
       - name: Run scraper
         run: |
@@ -45,10 +47,10 @@ jobs:
           export PYTHONPATH=$(pwd)
           python alerts.py
 
-      # SAVE (overwrite) the same cache key
+      # 2️⃣ SAVE new version
       - name: Save SQLite cache
         if: always()
         uses: actions/cache@v4
         with:
           path: out/hmlet_units.sqlite
-          key: hmlet-sqlite-db-v1
+          key: hmlet-sqlite-db-${{ github.run_id }}
