@@ -29,9 +29,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: out/hmlet_units.sqlite
-          key: hmlet-sqlite-db-v2
+          key: hmlet-sqlite-db-v1
           restore-keys: |
-            hmlet-sqlite-db-v2
+            hmlet-sqlite-db-v1
 
       - name: Run scraper
         run: |
@@ -53,6 +53,6 @@ jobs:
         uses: actions/cache@v4
         with:
           path: out/hmlet_units.sqlite
-          key: hmlet-sqlite-db-v2-${{ github.run_id }}
+          key: hmlet-sqlite-db-v1-${{ github.run_id }}
           restore-keys: |
-            hmlet-sqlite-db-v2
+            hmlet-sqlite-db-v1
