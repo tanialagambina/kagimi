@@ -228,7 +228,7 @@ def build_alert_message(
     # ---------------- MAIN QUERY RESULTS ----------------
 
     if new_units:
-        lines.append("🆕 NEW UNITS (Main search)")
+        lines.append("✨ NEW UNITS (Main search)")
         for uid in sorted(new_units):
             u = latest[uid]
             url = build_unit_url(
@@ -241,7 +241,7 @@ def build_alert_message(
                 f"+ [Unit {uid}] {u['property_name_en']} | {u['layout']} | "
                 f"{u['size_square_meters']} m² | {u['city_en']} | "
                 f"¥{u['price_jpy']:,}\n"
-                f"  {url}"
+                f" 👀➡️ {url}\n"
             )
         lines.append("")
 
@@ -259,7 +259,7 @@ def build_alert_message(
                 f"- [Unit {uid}] {u['property_name_en']} | {u['layout']} | "
                 f"{u['size_square_meters']} m² | {u['city_en']} | "
                 f"¥{u['price_jpy']:,}\n"
-                f"  {url}"
+                f" 👀➡️ {url}\n"
             )
         lines.append("")
 
@@ -280,7 +280,7 @@ def build_alert_message(
                 f"{arrow} [Unit {uid}] {l['property_name_en']} | {l['layout']} | "
                 f"{l['size_square_meters']} m² | "
                 f"¥{p['price_jpy']:,} → ¥{l['price_jpy']:,}\n"
-                f"  {url}"
+                f" 👀➡️ {url}\n"
             )
         lines.append("")
 
