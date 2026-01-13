@@ -10,7 +10,7 @@ FILTERS = {
     "min_price": 95_000,
     "max_price": 380_000,
     "gcc_id": 101,
-    "size_square_meters_min": 36,
+    "size_square_meters_min": 35,
     "size_square_meters_max": None,
 }
 
