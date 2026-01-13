@@ -159,10 +159,15 @@ def build_roundup_message(
                 f"  👀➡️ {url}\n"
             )
 
-    # Secondary suggestions (optional, but useful in roundup)
+    # Secondary suggestions ordered by "how many days earlier" (smallest first)
+    # i.e. 1 day earlier first, 15 days earlier last
     secondary_sorted = sorted(
         secondary_rows,
-        key=lambda r: (r["check_in_date"], r["price_jpy"] if r["price_jpy"] is not None else 10**18),
+        key=lambda r: (
+            days_earlier(primary_check_in, r["check_in_date"]),  # delta asc
+            r["price_jpy"] if r["price_jpy"] is not None else 10**18,  # then cheaper first
+            -(r["size_square_meters"] or 0),  # then larger first
+        ),
     )
 
     lines.append("\n💡 Also available if you start slightly earlier (secondary suggestions):\n")
