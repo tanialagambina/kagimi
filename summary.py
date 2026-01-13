@@ -137,9 +137,10 @@ def build_roundup_message(
     secondary_rows: list,
 ) -> str:
     lines = []
-    lines.append("HMLET WEEKLY ROUNDUP\n")
-    lines.append(f"Snapshot: {snapshot_dt}\n")
-    lines.append(f"Primary dates: {primary_check_in} → {primary_check_out}\n")
+    lines.append("Your Hmlet Weekly Roundup\n")
+    lines.append("_A summary of availability for your preferred and alternative dates._\n")
+    lines.append("☕ Grab a drink and take a moment to browse this week's available units!\n")
+    lines.append(f"\nQuery dates: {primary_check_in} → {primary_check_out}\n")
 
     # Sort primary units by price then size (nice predictable order)
     primary_units_rows_sorted = sorted(
@@ -147,16 +148,16 @@ def build_roundup_message(
         key=lambda r: (r["price_jpy"] if r["price_jpy"] is not None else 10**18, -(r["size_square_meters"] or 0)),
     )
 
-    lines.append("🏠 Available units in your PRIMARY time range:\n")
+    lines.append("🏠 Available units in your primary time range:\n")
     if not primary_units_rows_sorted:
         lines.append("  (No units available for the primary dates in this snapshot.)\n")
     else:
         for r in primary_units_rows_sorted:
             url = build_unit_url(r["property_id"], r["unit_id"], primary_check_in, primary_check_out)
             lines.append(
-                f"- [Unit {r['unit_id']}] {r['property_name_en']} | {r['layout']} | "
-                f"{r['size_square_meters']} m² | {r['city_en']} | ¥{r['price_jpy']:,}\n"
-                f"  👀➡️ {url}\n"
+                f"▪ [Unit {r['unit_id']}] {r['property_name_en']} | {r['layout']} | "
+                f"{r['size_square_meters']} m² | {r['city_en']} | 💴 ¥{r['price_jpy']:,}\n"
+                f"  ➡️ {url}\n"
             )
 
     # Secondary suggestions ordered by "how many days earlier" (smallest first)
@@ -170,7 +171,9 @@ def build_roundup_message(
         ),
     )
 
-    lines.append("\n💡 Also available if you start slightly earlier (secondary suggestions):\n")
+    lines.append("\n💡 Have you also considered these properties?\n")
+    lines.append("They are also available if you start your lease slightly earlier!\n")
+    lines.append("_You can pay for the extra days at the start of the lease, but physically move in on your preferred date._\n\n")
     if not secondary_sorted:
         lines.append("  (No secondary suggestions in this snapshot.)\n")
     else:
@@ -178,10 +181,10 @@ def build_roundup_message(
             delta = days_earlier(primary_check_in, r["check_in_date"])
             url = build_unit_url(r["property_id"], r["unit_id"], r["check_in_date"], primary_check_out)
             lines.append(
-                f"- [Unit {r['unit_id']}] {r['property_name_en']} | {r['layout']} | "
-                f"{r['size_square_meters']} m² | {r['city_en']} | ¥{r['price_jpy']:,}\n"
-                f"  → {delta} days earlier ({r['check_in_date']})\n"
-                f"  👀➡️ {url}\n"
+                f"▪ [Unit {r['unit_id']}] {r['property_name_en']} | {r['layout']} | "
+                f"{r['size_square_meters']} m² | {r['city_en']} | 💴 ¥{r['price_jpy']:,}\n"
+                f"  📆 {delta} days earlier ({r['check_in_date']})\n"
+                f"  ➡️ {url}\n"
             )
 
     return "\n".join(lines)
@@ -229,7 +232,7 @@ def main():
     print(message)
 
     send_email(
-        subject="📬 Weekly Hmlet roundup",
+        subject="📬 Hmlet Weekly Roundup",
         body=message,
     )
 
