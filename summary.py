@@ -177,7 +177,7 @@ def build_roundup_message(
     )
 
     lines.append("💡 Have you also considered these properties?\n")
-    lines.append("They are also available if you start your lease slightly earlier!\n")
+    lines.append("They are available if you start your lease slightly earlier!\n")
     lines.append("ℹ️ You can pay for the extra days at the start of the lease, but physically move in on your preferred date.\n")
     if not secondary_sorted:
         lines.append("  (No secondary suggestions in this snapshot.)\n")
