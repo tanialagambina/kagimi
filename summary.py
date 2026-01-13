@@ -10,7 +10,7 @@ from src.emailer import send_email
 
 DB_PATH = Path("out/hmlet_units.sqlite")
 SEPARATOR = "────────────────────────\n"
-SUB_SEPARATOR = "· · · · · · · · · · · · · · ·\n"
+SUB_SEPARATOR = "· · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · ·\n"
 
 
 
