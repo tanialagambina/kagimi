@@ -9,6 +9,9 @@ from src.emailer import send_email
 # --------------------------------------------------
 
 DB_PATH = Path("out/hmlet_units.sqlite")
+SEPARATOR = "────────────────────────\n"
+SUB_SEPARATOR = "· · · · · · · · · · · · · · ·\n"
+
 
 
 # --------------------------------------------------
@@ -141,6 +144,7 @@ def build_roundup_message(
     lines.append("A summary of availability for your preferred and alternative dates, could one of these be your future home?\n")
     lines.append("☕ Grab a drink and take a moment to browse this week's available units!\n")
     lines.append(f"Query dates: {primary_check_in} → {primary_check_out}\n")
+    lines.append(SUB_SEPARATOR)
 
     # Sort primary units by price then size (nice predictable order)
     primary_units_rows_sorted = sorted(
@@ -160,6 +164,7 @@ def build_roundup_message(
                 f"  ➡️ {url}\n"
             )
 
+    lines.append(SUB_SEPARATOR)
     # Secondary suggestions ordered by "how many days earlier" (smallest first)
     # i.e. 1 day earlier first, 15 days earlier last
     secondary_sorted = sorted(
