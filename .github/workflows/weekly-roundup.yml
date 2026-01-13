@@ -1,0 +1,57 @@
+name: Weekly Hmlet Roundup
+
+on:
+  schedule:
+    # Every Monday at 09:00 UK time in winter = 09:00 UTC.
+    # If you want a different time, tweak this.
+    - cron: "0 8 * * 5"
+  workflow_dispatch:
+
+jobs:
+  weekly-roundup:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # Restore latest cache (rolling)
+      - name: Restore SQLite cache
+        uses: actions/cache@v4
+        with:
+          path: out/hmlet_units.sqlite
+          key: hmlet-sqlite-db-${{ github.run_id }}
+          restore-keys: |
+            hmlet-sqlite-db-
+
+      - name: Run scraper
+        run: |
+          export PYTHONPATH=$(pwd)
+          python main.py
+
+      - name: Send weekly roundup
+        env:
+          GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          ALERT_EMAIL_TO: ${{ secrets.ALERT_EMAIL_TO }}
+        run: |
+          export PYTHONPATH=$(pwd)
+          python summary.py
+
+      # Save new version
+      - name: Save SQLite cache
+        if: always()
+        uses: actions/cache@v4
+        with:
+          path: out/hmlet_units.sqlite
+          key: hmlet-sqlite-db-${{ github.run_id }}
