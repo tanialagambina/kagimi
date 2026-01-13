@@ -138,7 +138,7 @@ def build_roundup_message(
 ) -> str:
     lines = []
     lines.append("Your Hmlet Weekly Roundup\n")
-    lines.append("_A summary of availability for your preferred and alternative dates._\n")
+    lines.append("A summary of availability for your preferred and alternative dates, could one of these be your future home?\n")
     lines.append("☕ Grab a drink and take a moment to browse this week's available units!\n")
     lines.append(f"\nQuery dates: {primary_check_in} → {primary_check_out}\n")
 
@@ -173,7 +173,7 @@ def build_roundup_message(
 
     lines.append("\n💡 Have you also considered these properties?\n")
     lines.append("They are also available if you start your lease slightly earlier!\n")
-    lines.append("_You can pay for the extra days at the start of the lease, but physically move in on your preferred date._\n\n")
+    lines.append("ℹ️ You can pay for the extra days at the start of the lease, but physically move in on your preferred date.\n\n")
     if not secondary_sorted:
         lines.append("  (No secondary suggestions in this snapshot.)\n")
     else:
