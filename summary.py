@@ -140,7 +140,7 @@ def build_roundup_message(
     lines.append("Your Hmlet Weekly Roundup\n")
     lines.append("A summary of availability for your preferred and alternative dates, could one of these be your future home?\n")
     lines.append("☕ Grab a drink and take a moment to browse this week's available units!\n")
-    lines.append(f"\nQuery dates: {primary_check_in} → {primary_check_out}\n")
+    lines.append(f"Query dates: {primary_check_in} → {primary_check_out}\n")
 
     # Sort primary units by price then size (nice predictable order)
     primary_units_rows_sorted = sorted(
