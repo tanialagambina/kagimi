@@ -117,6 +117,8 @@ def build_alert_message(
     lines.append("Here are the latest updates on your tracked properties:\n")
 
     # ---------------- MAIN QUERY ----------------
+    if any([new_units, removed_units, price_changes]):
+        lines.append(SUB_SEPARATOR)
 
     if new_units:
         lines.append("✨ New units have been detected in your time range ✨\n")
@@ -164,7 +166,8 @@ def build_alert_message(
         lines.append("✅ No changes in your main search\n")
 
     # ---------------- SECONDARY SUGGESTIONS ----------------
-
+    if any([new_suggestions, removed_suggestions, suggestion_price_changes]):
+        lines.append(SUB_SEPARATOR)
     if new_suggestions:
         lines.append("💡 Have you also considered these properties?")
         lines.append("They are available if you start your lease slightly earlier!")
