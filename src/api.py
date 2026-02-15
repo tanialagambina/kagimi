@@ -125,3 +125,24 @@ def fetch_properties() -> List[Dict]:
 
     response.raise_for_status()
     return response.json()
+
+def fetch_units_for_property(property_id):
+    response = requests.get(
+        UNITS_API_URL,
+        params={
+            "property_id": property_id,
+            "layouts": ",".join(FILTERS["layouts"]),
+            "min_price": FILTERS["min_price"],
+            "max_price": FILTERS["max_price"],
+            "gcc_id": FILTERS["gcc_id"],
+            "limit": 50,
+            "offset": 0,
+            "order_by": "list_price",
+        },
+        headers=HEADERS,
+        timeout=30,
+    )
+
+    response.raise_for_status()
+    return response.json().get("items", [])
+

@@ -1,4 +1,3 @@
-from datetime import date
 from src.emailer import send_email
 from src.hmlet_helpers import (
     get_connection,
@@ -8,9 +7,12 @@ from src.hmlet_helpers import (
     fetch_units_for_snapshot,
     fetch_secondary_only_units_for_snapshot,
     fetch_properties_opened_this_week,
+    build_all_unit_urls,
     DB_PATH,
     SUB_SEPARATOR,
+    SEPARATOR,
 )
+from src.api import fetch_units_for_property
 
 # --------------------------------------------------
 # SNAPSHOT HELPERS
@@ -110,19 +112,40 @@ def build_roundup_message(
                 f"  ➡️ {url}\n"
             )
 
-    if new_properties_this_week:
-        lines.append(SUB_SEPARATOR)
-        lines.append("🎉 New buildings opened this week:\n")
-        lines.append(
-            "While there may not be availability for your dates yet, they're worth keeping an eye on as there could be soon!\n"
-        )
-        for p in new_properties_this_week:
+        if new_properties_this_week:
+            lines.append(SUB_SEPARATOR)
+            lines.append("🎉 New buildings opened this week:\n")
             lines.append(
-                f"▪ [Property {p['property_id']}] "
-                f"{p['property_name_en']} ({p['property_name_ja']})\n"
-                f"  🏠 Rooms Available: {p['available_room_count']}\n"
-                f"  💴 From ¥{p['minimum_list_price']:,}\n"
+                "While there may not be availability for your dates yet, "
+                "they're worth keeping an eye on as there could be soon!\n"
             )
+
+            for p in sorted(new_properties_this_week, key=lambda r: r["minimum_list_price"]):
+
+                units = fetch_units_for_property(p["property_id"])
+                unit_urls = build_all_unit_urls(units)
+                unit_urls = sorted(unit_urls, key=lambda x: x[0]["list_price"])
+
+
+                lines.append(
+                    f"🏢 [Property {p['property_id']}] "
+                    f"{p['property_name_en']} ({p['property_name_ja']})\n"
+                    f"💴 From ¥{p['minimum_list_price']:,}\n"
+                )
+
+                if not unit_urls:
+                    lines.append("  (No units currently available)\n")
+                else:
+                    for unit, url in unit_urls:
+                        lines.append(
+                            f"▪ [Unit {unit['unit_id']}] "
+                            f"{unit['layout']} | {unit['size_square_meters']} m² | "
+                            f"💴 ¥{unit['list_price']:,}\n"
+                            f"  ➡️ {url}\n"
+                        )
+
+                lines.append(SEPARATOR)
+
 
 
     lines.append(SUB_SEPARATOR)

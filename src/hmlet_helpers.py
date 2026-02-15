@@ -28,6 +28,63 @@ def days_earlier(primary_check_in: str, suggested_check_in: str) -> int:
     suggested = date.fromisoformat(suggested_check_in)
     return (primary - suggested).days
 
+def most_expensive_unit_url(units, check_in=None, check_out=None):
+    """
+    Returns a Hmlet URL for the most expensive unit.
+
+    units → list of API unit dicts
+    """
+
+    if not units:
+        return None
+
+    unit = max(units, key=lambda u: u["list_price"])
+
+    if check_in and check_out:
+        return build_unit_url(
+            unit["property_id"],
+            unit["unit_id"],
+            check_in,
+            check_out,
+        )
+
+    return (
+        f"https://hmlet.com/en/property/{unit['property_id']}"
+        f"/units/{unit['unit_id']}/detail"
+    )
+
+def build_all_unit_urls(units, check_in=None, check_out=None):
+    """
+    Returns URLs for ALL units.
+
+    units → list of API unit dicts
+    """
+
+    if not units:
+        return []
+
+    urls = []
+
+    for unit in units:
+
+        if check_in and check_out:
+            url = build_unit_url(
+                unit["property_id"],
+                unit["unit_id"],
+                check_in,
+                check_out,
+            )
+        else:
+            url = (
+                f"https://hmlet.com/en/property/{unit['property_id']}"
+                f"/units/{unit['unit_id']}/detail"
+            )
+
+        urls.append((unit, url))
+
+    return urls
+
+
 
 # --------------------------------------------------
 # DB HELPERS
