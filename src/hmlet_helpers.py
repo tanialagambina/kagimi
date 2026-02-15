@@ -366,3 +366,11 @@ def filter_out_first_floor(rows, debug=False):
         filtered.append(r)
 
     return filtered
+
+
+def build_google_maps_search(property_name):
+    if not property_name:
+        return None
+
+    query = f"Hmlet {property_name}"
+    return f"https://www.google.com/maps?q={query.replace(' ', '+')}"

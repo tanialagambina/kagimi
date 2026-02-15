@@ -11,6 +11,7 @@ from src.hmlet_helpers import (
     unit_floor,
     ordinal,
     filter_out_first_floor,
+    build_google_maps_search,
     DB_PATH,
     SUB_SEPARATOR,
     SEPARATOR,
@@ -130,10 +131,13 @@ def build_roundup_message(
                 unit_urls = sorted(unit_urls, key=lambda x: x[0]["list_price"])
 
 
+                maps_link = build_google_maps_search(p["property_name_en"])
+
                 lines.append(
                     f"🏢 [Property {p['property_id']}] "
                     f"{p['property_name_en']} ({p['property_name_ja']})\n"
                     f"💴 From ¥{p['minimum_list_price']:,}\n"
+                    f"📍 {maps_link}\n"
                 )
 
                 if not unit_urls:

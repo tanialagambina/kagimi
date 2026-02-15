@@ -11,6 +11,7 @@ from src.hmlet_helpers import (
     build_all_unit_urls,
     unit_floor,
     ordinal,
+    build_google_maps_search,
     SUB_SEPARATOR,
     SEPARATOR,
 )
@@ -36,10 +37,13 @@ def build_property_alert_message(new_properties, latest, latest_dt):
         units = fetch_units_for_property(p["property_id"])
         unit_urls = build_all_unit_urls(units)
 
+        maps_link = build_google_maps_search(p["property_name_en"])
+
         lines.append(
             f"🏢 [Property {p['property_id']}] "
             f"{p['property_name_en']} ({p['property_name_ja']})\n"
             f"💴 From ¥{p['minimum_list_price']:,}\n"
+            f"📍 {maps_link}\n"
         )
 
         if not unit_urls:
