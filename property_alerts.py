@@ -46,7 +46,7 @@ def build_property_alert_message(new_properties, latest, latest_dt):
             for unit, url in unit_urls:
                 lines.append(
                     f"▪ [Unit {unit['unit_id']}] "
-                    f"{unit['layout']} | {unit['size_square_meters']} m² | "
+                    f"{unit['layout']} | 🔑 {unit['unit_number']} | {unit['size_square_meters']} m² | "
                     f"💴 ¥{unit['list_price']:,}\n"
                     f"  ➡️ {url}\n"
                 )

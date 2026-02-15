@@ -73,7 +73,7 @@ def build_roundup_message(
                 r["property_id"], r["unit_id"], primary_check_in, primary_check_out
             )
             lines.append(
-                f"▪ [Unit {r['unit_id']}] {r['property_name_en']} | {r['layout']} | "
+                f"▪ [Unit {r['unit_id']}] {r['property_name_en']} | {r['layout']} | 🔑 {r['unit_number']} | "
                 f"{r['size_square_meters']} m² | {r['city_en']} | 💴 ¥{r['price_jpy']:,}\n"
                 f"  ➡️ {url}\n"
             )
@@ -106,7 +106,7 @@ def build_roundup_message(
                 r["property_id"], r["unit_id"], r["check_in_date"], primary_check_out
             )
             lines.append(
-                f"▪ [Unit {r['unit_id']}] {r['property_name_en']} | {r['layout']} | "
+                f"▪ [Unit {r['unit_id']}] {r['property_name_en']} | {r['layout']} | 🔑 {r['unit_number']} | "
                 f"{r['size_square_meters']} m² | {r['city_en']} | 💴 ¥{r['price_jpy']:,}\n"
                 f"  📆 {delta} days earlier ({r['check_in_date']})\n"
                 f"  ➡️ {url}\n"
@@ -139,7 +139,7 @@ def build_roundup_message(
                     for unit, url in unit_urls:
                         lines.append(
                             f"▪ [Unit {unit['unit_id']}] "
-                            f"{unit['layout']} | {unit['size_square_meters']} m² | "
+                            f"{unit['layout']} | 🔑 {unit['unit_number']} | {unit['size_square_meters']} m² | "
                             f"💴 ¥{unit['list_price']:,}\n"
                             f"  ➡️ {url}\n"
                         )
