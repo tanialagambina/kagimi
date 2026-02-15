@@ -48,7 +48,7 @@ def build_property_alert_message(new_properties, latest, latest_dt):
         )
 
         if not unit_urls:
-            lines.append("  (No units currently available)\n")
+            lines.append("  (No units currently available for selected filters)\n")
         else:
             for unit, url in unit_urls:
                 lines.append(

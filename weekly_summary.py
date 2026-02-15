@@ -142,7 +142,7 @@ def build_roundup_message(
                 )
 
                 if not unit_urls:
-                    lines.append("  (No units currently available)\n")
+                    lines.append("  (No units currently available for selected filters)\n")
                 else:
                     for unit, url in unit_urls:
                         lines.append(
