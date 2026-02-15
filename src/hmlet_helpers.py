@@ -215,3 +215,34 @@ def compare_property_snapshots(latest, previous):
     new_properties = latest_ids - previous_ids
 
     return new_properties
+
+# --------------------------------------------------
+# WEEKLY PROPERTY DISCOVERY
+# --------------------------------------------------
+
+def fetch_properties_opened_this_week(conn):
+    """
+    Properties that appeared for the first time in the last 7 days.
+    """
+
+    return conn.execute(
+        """
+        SELECT DISTINCT
+            p.property_id,
+            p.property_name_en,
+            p.property_name_ja,
+            p.available_room_count,
+            p.minimum_list_price
+        FROM property_snapshots p
+
+        WHERE p.snapshot_datetime >= datetime('now', '-7 days')
+
+          AND p.property_id NOT IN (
+              SELECT property_id
+              FROM property_snapshots
+              WHERE snapshot_datetime < datetime('now', '-7 days')
+          )
+
+        ORDER BY p.minimum_list_price ASC
+        """
+    ).fetchall()

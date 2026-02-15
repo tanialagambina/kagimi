@@ -46,7 +46,7 @@ jobs:
           ALERT_EMAIL_TO: ${{ secrets.ALERT_EMAIL_TO }}
         run: |
           export PYTHONPATH=$(pwd)
-          python summary.py
+          python weekly_summary.py
 
       # Save new version
       - name: Save SQLite cache
