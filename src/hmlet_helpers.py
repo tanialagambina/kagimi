@@ -308,18 +308,34 @@ def fetch_properties_opened_this_week(conn):
 
 def unit_floor(unit_number):
     """
-    Converts unit number → floor number.
+    Converts unit number → floor label.
 
-    Examples:
-    502 → 5
-    103 → 1
-    1003 → 10
+    Rules:
+    1 / 2 → Basement
+    101 → 1st floor
+    502 → 5th floor
+    1003 → 10th floor
     """
 
-    if not unit_number:
+    if unit_number is None:
         return None
 
-    return int(str(unit_number)[:-2])
+    unit_str = str(unit_number).strip()
+
+    if not unit_str:
+        return None
+
+    if len(unit_str) == 1:
+        return 1
+
+    if len(unit_str) >= 3:
+        floor_part = unit_str[:-2]
+
+        if floor_part.isdigit():
+            return int(floor_part)
+
+    return None
+
 
 def ordinal(n):
     """
