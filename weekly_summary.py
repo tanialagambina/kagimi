@@ -118,10 +118,12 @@ def build_roundup_message(
         )
         for p in new_properties_this_week:
             lines.append(
-                f"▪ {p['property_name_en']} ({p['property_name_ja']})\n"
+                f"▪ [Property {p['property_id']}] "
+                f"{p['property_name_en']} ({p['property_name_ja']})\n"
                 f"  🏠 Rooms Available: {p['available_room_count']}\n"
                 f"  💴 From ¥{p['minimum_list_price']:,}\n"
             )
+
 
     lines.append(SUB_SEPARATOR)
     lines.append(f"Snapshot taken at: {snapshot_dt}\n")

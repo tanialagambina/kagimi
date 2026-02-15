@@ -29,7 +29,8 @@ def build_property_alert_message(new_properties, latest, latest_dt):
         p = latest[pid]
 
         lines.append(
-            f"▪ {p['property_name_en']} ({p['property_name_ja']})\n"
+            f"▪ [Property {p['property_id']}] "
+            f"{p['property_name_en']} ({p['property_name_ja']})\n"
             f"  🏠 Rooms Available: {p['available_room_count']}\n"
             f"  💴 From ¥{p['minimum_list_price']:,}\n"
         )
