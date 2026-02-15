@@ -12,7 +12,7 @@ FILTERS = {
     "min_price": 95_000,
     "max_price": 380_000,
     "gcc_id": 101, # Tokyo
-    "size_square_meters_min": 35,
+    "size_square_meters_min": 34,
     "size_square_meters_max": None,
 }
 
@@ -20,7 +20,7 @@ FILTERS = {
 MAIN_CHECK_IN = date.fromisoformat("2026-10-01")
 CHECK_OUT = "2027-03-29"
 
-SUGGESTION_WINDOW_DAYS = 30  # 4 weeks
+SUGGESTION_WINDOW_DAYS = 15  # 2 weeks
 
 QUERIES = []
 
