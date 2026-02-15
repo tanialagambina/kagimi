@@ -135,7 +135,7 @@ def fetch_units_for_property(property_id):
             "min_price": FILTERS["min_price"],
             "max_price": FILTERS["max_price"],
             "gcc_id": FILTERS["gcc_id"],
-            "limit": 50,
+            "limit": 12,
             "offset": 0,
             "order_by": "list_price",
         },
