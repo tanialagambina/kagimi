@@ -117,7 +117,7 @@ def build_alert_message(
     lines = []
 
     lines.append("🗼 HMLET Alerts")
-    lines.append("Here are the latest updates on your tracked properties:\n")
+    lines.append("Here are the latest updates on the properties for your filters:\n")
 
     # ---------------- MAIN QUERY ----------------
     if any([new_units, removed_units, price_changes]):

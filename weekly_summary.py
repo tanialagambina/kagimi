@@ -67,7 +67,7 @@ def build_roundup_message(
         ),
     )
 
-    lines.append("🏠 Available units in your primary time range:\n")
+    lines.append("🏠 Available units in your primary time range for your filters:\n")
     if not primary_units_rows_sorted:
         lines.append("  (No units available for the primary dates in this snapshot.)\n")
     else:
