@@ -131,7 +131,7 @@ def build_alert_message(
                 u["property_id"], uid, primary_check_in, primary_check_out
             )
             lines.append(
-                f"▪ [Unit {uid}] {u['property_name_en']} | {u['layout']} | 🔑 {ordinal(unit_floor(u['unit_number']))} floor | "
+                f"▪ [Unit {uid}] {u['property_name_en']} | {u['layout']} | {ordinal(unit_floor(u['unit_number']))} floor | "
                 f"{u['size_square_meters']} m² | {u['city_en']} | 💴 ¥{u['price_jpy']:,}\n"
                 f"  ➡️ {url}\n"
             )
@@ -144,7 +144,7 @@ def build_alert_message(
                 u["property_id"], uid, primary_check_in, primary_check_out
             )
             lines.append(
-                f"▪ [Unit {uid}] {u['property_name_en']} | {u['layout']} | 🔑 {ordinal(unit_floor(u['unit_number']))} floor | "
+                f"▪ [Unit {uid}] {u['property_name_en']} | {u['layout']} | {ordinal(unit_floor(u['unit_number']))} floor | "
                 f"{u['size_square_meters']} m² | {u['city_en']} | 💴 ¥{u['price_jpy']:,}\n"
                 f"  ➡️ {url}\n"
             )
@@ -159,7 +159,7 @@ def build_alert_message(
                 l["property_id"], uid, primary_check_in, primary_check_out
             )
             lines.append(
-                f"{arrow} [Unit {uid}] {l['property_name_en']} | {l['layout']} | 🔑 {ordinal(unit_floor(l['unit_number']))} floor | "
+                f"{arrow} [Unit {uid}] {l['property_name_en']} | {l['layout']} | {ordinal(unit_floor(l['unit_number']))} floor | "
                 f"{l['size_square_meters']} m² | "
                 f"💴 ¥{p['price_jpy']:,} → 💴 ¥{l['price_jpy']:,}\n"
                 f"  ➡️ {url}\n"
@@ -186,7 +186,7 @@ def build_alert_message(
                 s["property_id"], s["unit_id"], s["check_in_date"], primary_check_out
             )
             lines.append(
-                f"▪ [Unit {s['unit_id']}] {s['property_name_en']} | {s['layout']} | 🔑 {ordinal(unit_floor(s['unit_number']))} floor | "
+                f"▪ [Unit {s['unit_id']}] {s['property_name_en']} | {s['layout']} | {ordinal(unit_floor(s['unit_number']))} floor | "
                 f"{s['size_square_meters']} m² | {s['city_en']} | 💴 ¥{s['price_jpy']:,}\n"
                 f"  → {delta} days earlier ({s['check_in_date']})\n"
                 f"  ➡️ {url}\n"
@@ -204,7 +204,7 @@ def build_alert_message(
                 s["property_id"], s["unit_id"], s["check_in_date"], primary_check_out
             )
             lines.append(
-                f"▪ [Unit {s['unit_id']}] {s['property_name_en']} | {s['layout']} | 🔑 {ordinal(unit_floor(s['unit_number']))} floor | "
+                f"▪ [Unit {s['unit_id']}] {s['property_name_en']} | {s['layout']} | {ordinal(unit_floor(s['unit_number']))} floor | "
                 f"{s['size_square_meters']} m² | {s['city_en']} | 💴 ¥{s['price_jpy']:,}\n"
                 f"  ➡️ {url}\n"
             )
@@ -225,7 +225,7 @@ def build_alert_message(
                 l["property_id"], l["unit_id"], l["check_in_date"], primary_check_out
             )
             lines.append(
-                f"{arrow} [Unit {l['unit_id']}] {l['property_name_en']} | {l['layout']} | 🔑 {ordinal(unit_floor(l['unit_number']))} floor | "
+                f"{arrow} [Unit {l['unit_id']}] {l['property_name_en']} | {l['layout']} | {ordinal(unit_floor(l['unit_number']))} floor | "
                 f"{l['size_square_meters']} m²\n"
                 f" 💴 ¥{p['price_jpy']:,} → ¥{l['price_jpy']:,}\n"
                 f"  ➡️ {url}\n"
