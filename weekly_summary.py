@@ -10,6 +10,7 @@ from src.hmlet_helpers import (
     build_all_unit_urls,
     unit_floor,
     ordinal,
+    filter_out_first_floor,
     DB_PATH,
     SUB_SEPARATOR,
     SEPARATOR,
@@ -186,10 +187,16 @@ def main():
         conn.close()
         return
 
-    primary_units = fetch_units_for_snapshot(conn, snapshot_dt, primary_query_id)
-    secondary_units = fetch_secondary_only_units_for_snapshot(
-        conn, snapshot_dt, primary_query_id
+    primary_units = filter_out_first_floor(
+        fetch_units_for_snapshot(conn, snapshot_dt, primary_query_id)
     )
+
+    secondary_units = filter_out_first_floor(
+        fetch_secondary_only_units_for_snapshot(
+            conn, snapshot_dt, primary_query_id
+        )
+    )
+
     new_properties_this_week = fetch_properties_opened_this_week(conn)
 
     message = build_roundup_message(

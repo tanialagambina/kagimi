@@ -335,3 +335,18 @@ def ordinal(n):
 
     return f"{n}{suffix}"
 
+def filter_out_first_floor(rows, debug=False):
+
+    filtered = []
+
+    for r in rows:
+        floor = unit_floor(r["unit_number"])
+
+        if floor == 1:
+            if debug:
+                print(f"Skipping 1st floor unit {r['unit_id']}")
+            continue
+
+        filtered.append(r)
+
+    return filtered

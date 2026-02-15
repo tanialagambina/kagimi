@@ -10,6 +10,7 @@ from src.hmlet_helpers import (
     sort_secondary_rows,
     unit_floor,
     ordinal,
+    filter_out_first_floor,
     SUB_SEPARATOR,
     DB_PATH,
 )
@@ -264,8 +265,13 @@ def main():
         print("Only one snapshot exists — nothing to compare yet.")
         return
 
-    latest_rows = fetch_units_for_snapshot(conn, latest_dt, primary_query_id)
-    previous_rows = fetch_units_for_snapshot(conn, previous_dt, primary_query_id)
+    latest_rows = filter_out_first_floor(
+        fetch_units_for_snapshot(conn, latest_dt, primary_query_id)
+    )
+
+    previous_rows = filter_out_first_floor(
+        fetch_units_for_snapshot(conn, previous_dt, primary_query_id)
+    )
 
     latest = {row["unit_id"]: row for row in latest_rows}
     previous = {row["unit_id"]: row for row in previous_rows}
@@ -273,11 +279,12 @@ def main():
 
     new_units, removed_units, price_changes = compare_snapshots(latest, previous)
 
-    latest_suggestions = fetch_secondary_only_units_for_snapshot(
-        conn, latest_dt, primary_query_id
+    latest_suggestions = filter_out_first_floor(
+        fetch_secondary_only_units_for_snapshot(conn, latest_dt, primary_query_id)
     )
-    previous_suggestions = fetch_secondary_only_units_for_snapshot(
-        conn, previous_dt, primary_query_id
+
+    previous_suggestions = filter_out_first_floor(
+        fetch_secondary_only_units_for_snapshot(conn, previous_dt, primary_query_id)
     )
 
     (
