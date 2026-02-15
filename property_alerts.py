@@ -67,14 +67,14 @@ def main():
 
     latest = fetch_properties_for_snapshot(conn, latest_dt)
     previous = fetch_properties_for_snapshot(conn, previous_dt)
-    new_properties = compare_property_snapshots(latest, previous, latest_dt)
+    new_properties = compare_property_snapshots(latest, previous)
 
     if not new_properties:
         print("✅ No new properties detected.")
         conn.close()
         return
 
-    message = build_property_alert_message(new_properties, latest)
+    message = build_property_alert_message(new_properties, latest, latest_dt)
 
     print(message)
 
