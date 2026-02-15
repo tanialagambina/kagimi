@@ -1,6 +1,8 @@
 import sqlite3
 from pathlib import Path
 from datetime import date, datetime
+from urllib.parse import quote_plus
+
 
 
 #--------------------------------------------------
@@ -373,4 +375,5 @@ def build_google_maps_search(property_name):
         return None
 
     query = f"Hmlet {property_name}"
-    return f"https://www.google.com/maps?q={query.replace(' ', '+')}"
+
+    return f"https://www.google.com/maps?q={quote_plus(query)}"
