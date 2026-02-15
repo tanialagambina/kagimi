@@ -7,7 +7,7 @@ PROPERTIES_API_URL = "https://ywzjnepacv.ap-northeast-1.awsapprunner.com/v1/prop
 
 FILTERS = {
     "layouts": [
-        "1LDK","2LDK","3LDK",
+        "1LDK","2LDK","3LDK","1K","1DK","1DKS","2K","2DK","3K","3DK",
     ],
     "min_price": 95_000,
     "max_price": 380_000,
