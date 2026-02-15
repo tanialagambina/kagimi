@@ -1,59 +1,21 @@
-import sqlite3
-from pathlib import Path
-from datetime import date
+
 from src.emailer import send_email
+from src.hmlet_helpers import (
+    get_connection,
+    get_primary_query,
+    build_unit_url,
+    days_earlier,
+    fetch_units_for_snapshot,
+    fetch_secondary_only_units_for_snapshot,
+    sort_secondary_rows,
+    SUB_SEPARATOR,
+    DB_PATH,
+)
 
 
-# --------------------------------------------------
-# CONFIG
-# --------------------------------------------------
-
-DB_PATH = Path("out/hmlet_units.sqlite")
-SEPARATOR = "────────────────────────\n"
-SUB_SEPARATOR = "· · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · ·\n"
-
-
-# --------------------------------------------------
-# URL HELPERS
-# --------------------------------------------------
-
-
-def build_unit_url(
-    property_id: int, unit_id: int, check_in: str, check_out: str
-) -> str:
-    return (
-        f"https://hmlet.com/en/property/{property_id}/units/{unit_id}/detail"
-        f"?check_in={check_in}&check_out={check_out}"
-    )
-
-
-def days_earlier(primary_check_in: str, suggested_check_in: str) -> int:
-    primary = date.fromisoformat(primary_check_in)
-    suggested = date.fromisoformat(suggested_check_in)
-    return (primary - suggested).days
-
-
-# --------------------------------------------------
-# DB HELPERS
-# --------------------------------------------------
-
-
-def get_connection():
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row
-    conn.execute("PRAGMA foreign_keys = ON")
-    return conn
-
-
-def get_primary_query(conn):
-    return conn.execute(
-        """
-        SELECT query_id, check_in_date, check_out_date
-        FROM queries
-        WHERE is_primary = 1
-        """
-    ).fetchone()
-
+#--------------------------------------------------
+# SNAPSHOT HELPERS
+#--------------------------------------------------
 
 def get_last_two_snapshots(conn):
     rows = conn.execute(
@@ -69,61 +31,6 @@ def get_last_two_snapshots(conn):
         return None, None
 
     return rows[0]["snapshot_datetime"], rows[1]["snapshot_datetime"]
-
-
-def fetch_units_for_snapshot(conn, snapshot_datetime: str, query_id: int):
-    rows = conn.execute(
-        """
-        SELECT
-            s.unit_id,
-            s.price_jpy,
-            u.property_id,
-            u.property_name_en,
-            u.layout,
-            u.city_en,
-            u.size_square_meters
-        FROM availability_snapshots s
-        JOIN units u ON u.unit_id = s.unit_id
-        WHERE s.snapshot_datetime = ?
-          AND s.query_id = ?
-        """,
-        (snapshot_datetime, query_id),
-    ).fetchall()
-
-    return {row["unit_id"]: row for row in rows}
-
-
-def fetch_secondary_only_units_for_snapshot(
-    conn,
-    snapshot_datetime: str,
-    primary_query_id: int,
-):
-    return conn.execute(
-        """
-        SELECT
-            s.unit_id,
-            u.property_id,
-            u.property_name_en,
-            u.layout,
-            u.city_en,
-            u.size_square_meters,
-            s.price_jpy,
-            MAX(q.check_in_date) AS check_in_date
-        FROM availability_snapshots s
-        JOIN units u ON u.unit_id = s.unit_id
-        JOIN queries q ON q.query_id = s.query_id
-        WHERE s.snapshot_datetime = ?
-          AND q.is_primary = 0
-          AND s.unit_id NOT IN (
-              SELECT unit_id
-              FROM availability_snapshots
-              WHERE snapshot_datetime = ?
-                AND query_id = ?
-          )
-        GROUP BY s.unit_id
-        """,
-        (snapshot_datetime, snapshot_datetime, primary_query_id),
-    ).fetchall()
 
 
 # --------------------------------------------------
@@ -262,7 +169,12 @@ def build_alert_message(
         lines.append("💡 Have you also considered these properties?")
         lines.append("They are available if you start your lease slightly earlier!")
         lines.append("ℹ️ You can pay for the extra days at the start of the lease, but physically move in on your preferred date.\n")
-        for s in new_suggestions.values():
+        sorted_new = sort_secondary_rows(
+            new_suggestions.values(),
+            primary_check_in,
+        )
+
+        for s in sorted_new:
             delta = days_earlier(primary_check_in, s["check_in_date"])
             url = build_unit_url(
                 s["property_id"], s["unit_id"], s["check_in_date"], primary_check_out
@@ -276,7 +188,12 @@ def build_alert_message(
 
     if removed_suggestions:
         lines.append("❌ Removed properties detected from earlier move-in options:\n")
-        for s in removed_suggestions.values():
+        sorted_removed = sort_secondary_rows(
+            removed_suggestions.values(),
+            primary_check_in,
+        )
+
+        for s in sorted_removed:
             url = build_unit_url(
                 s["property_id"], s["unit_id"], s["check_in_date"], primary_check_out
             )
@@ -286,7 +203,15 @@ def build_alert_message(
                 f"  ➡️ {url}\n"
             )
 
-    if suggestion_price_changes:
+    sorted_price_changes = sorted(
+        suggestion_price_changes,
+        key=lambda pair: (
+            days_earlier(primary_check_in, pair[0]["check_in_date"]),
+            pair[0]["price_jpy"] if pair[0]["price_jpy"] is not None else 10**18,
+        ),
+    )
+
+    for l, p in sorted_price_changes:
         lines.append("💰 Price changes detected for earlier move in options:\n")
         for l, p in suggestion_price_changes:
             arrow = "⬆️" if l["price_jpy"] > p["price_jpy"] else "⬇️"
@@ -334,8 +259,12 @@ def main():
         print("Only one snapshot exists — nothing to compare yet.")
         return
 
-    latest = fetch_units_for_snapshot(conn, latest_dt, primary_query_id)
-    previous = fetch_units_for_snapshot(conn, previous_dt, primary_query_id)
+    latest_rows = fetch_units_for_snapshot(conn, latest_dt, primary_query_id)
+    previous_rows = fetch_units_for_snapshot(conn, previous_dt, primary_query_id)
+
+    latest = {row["unit_id"]: row for row in latest_rows}
+    previous = {row["unit_id"]: row for row in previous_rows}
+
 
     new_units, removed_units, price_changes = compare_snapshots(latest, previous)
 
