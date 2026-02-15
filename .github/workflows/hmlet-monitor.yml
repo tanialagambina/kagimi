@@ -45,7 +45,7 @@ jobs:
           ALERT_EMAIL_TO: ${{ secrets.ALERT_EMAIL_TO }}
         run: |
           export PYTHONPATH=$(pwd)
-          python alerts.py
+          python unit_alerts.py
 
       - name: Run property alerts
         env:

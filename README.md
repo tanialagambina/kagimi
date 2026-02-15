@@ -26,16 +26,16 @@ Run scripts
 python main.py
 ```
 
-- Check for changes since the last snapshot (alerts):
+- Check for changes since the last snapshot (unit_alerts):
 
 ```bash
-python alerts.py
+python unit_alerts.py
 ```
 
 Notes
 
 - `main.py` fetches units and writes CSV/SQLite snapshots in `out/`.
-- `alerts.py` compares the latest snapshot with the previous one and prints alerts.
+- `unit_alerts.py` compares the latest snapshot with the previous one and prints alerts.
 
 
 Automation
