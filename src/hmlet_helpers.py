@@ -1,6 +1,6 @@
 import sqlite3
 from pathlib import Path
-from datetime import date
+from datetime import date, datetime
 
 
 #--------------------------------------------------
@@ -102,6 +102,93 @@ def fetch_secondary_only_units_for_snapshot(
         (snapshot_datetime, snapshot_datetime, primary_query_id),
     ).fetchall()
 
+# --------------------------------------------------
+# SCHEMA MANAGEMENT
+# --------------------------------------------------
+
+def initialise_schema(conn):
+    """
+    Ensures required tables exist.
+    Safe to run every time.
+    """
+
+    conn.execute(
+        """
+        CREATE TABLE IF NOT EXISTS property_snapshots (
+            snapshot_datetime TEXT,
+            property_id INTEGER,
+            property_name_en TEXT,
+            property_name_ja TEXT,
+            available_room_count INTEGER,
+            minimum_list_price INTEGER,
+
+            PRIMARY KEY (snapshot_datetime, property_id)
+        )
+        """
+    )
+
+    conn.commit()
+
+
+# --------------------------------------------------
+# PROPERTY SNAPSHOT HELPERS
+# --------------------------------------------------
+
+def insert_property_snapshot(conn, snapshot_dt, properties):
+    conn.executemany(
+        """
+        INSERT OR REPLACE INTO property_snapshots (
+            snapshot_datetime,
+            property_id,
+            property_name_en,
+            property_name_ja,
+            available_room_count,
+            minimum_list_price
+        )
+        VALUES (?, ?, ?, ?, ?, ?)
+        """,
+        [
+            (
+                snapshot_dt,
+                p["property_id"],
+                p["property_name_en"],
+                p["property_name_ja"],
+                p["available_room_count"],
+                p["minimum_list_price"],
+            )
+            for p in properties
+        ],
+    )
+    conn.commit()
+
+
+def get_last_two_property_snapshots(conn):
+    rows = conn.execute(
+        """
+        SELECT DISTINCT snapshot_datetime
+        FROM property_snapshots
+        ORDER BY snapshot_datetime DESC
+        LIMIT 2
+        """
+    ).fetchall()
+
+    if len(rows) < 2:
+        return None, None
+
+    return rows[0]["snapshot_datetime"], rows[1]["snapshot_datetime"]
+
+
+def fetch_properties_for_snapshot(conn, snapshot_dt):
+    rows = conn.execute(
+        """
+        SELECT *
+        FROM property_snapshots
+        WHERE snapshot_datetime = ?
+        """,
+        (snapshot_dt,),
+    ).fetchall()
+
+    return {row["property_id"]: row for row in rows}
 
 # --------------------------------------------------
 # SORTING
@@ -116,3 +203,15 @@ def sort_secondary_rows(rows, primary_check_in):
             -(r["size_square_meters"] or 0),
         ),
     )
+
+# --------------------------------------------------
+# PROPERTY DIFF LOGIC
+# --------------------------------------------------
+
+def compare_property_snapshots(latest, previous):
+    latest_ids = set(latest.keys())
+    previous_ids = set(previous.keys())
+
+    new_properties = latest_ids - previous_ids
+
+    return new_properties

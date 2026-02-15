@@ -38,7 +38,7 @@ jobs:
           export PYTHONPATH=$(pwd)
           python main.py
 
-      - name: Run alerts
+      - name: Run unit alerts
         env:
           GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
           GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
@@ -46,6 +46,15 @@ jobs:
         run: |
           export PYTHONPATH=$(pwd)
           python alerts.py
+
+      - name: Run property alerts
+        env:
+          GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          ALERT_EMAIL_TO: ${{ secrets.ALERT_EMAIL_TO }}
+        run: |
+          export PYTHONPATH=$(pwd)
+          python property_alerts.py
 
       # 2️⃣ SAVE new version
       - name: Save SQLite cache

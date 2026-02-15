@@ -1,7 +1,9 @@
 from datetime import date, datetime, timezone, timedelta
 from pathlib import Path
 
-API_URL = "https://ywzjnepacv.ap-northeast-1.awsapprunner.com/v1/units"
+UNITS_API_URL = "https://ywzjnepacv.ap-northeast-1.awsapprunner.com/v1/units"
+
+PROPERTIES_API_URL = "https://ywzjnepacv.ap-northeast-1.awsapprunner.com/v1/properties/location"
 
 FILTERS = {
     "layouts": [
@@ -9,7 +11,7 @@ FILTERS = {
     ],
     "min_price": 95_000,
     "max_price": 380_000,
-    "gcc_id": 101,
+    "gcc_id": 101, # Tokyo
     "size_square_meters_min": 35,
     "size_square_meters_max": None,
 }

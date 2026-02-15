@@ -4,12 +4,14 @@ import random
 import requests
 
 from src.config import (
-    API_URL,
+    UNITS_API_URL,
+    PROPERTIES_API_URL,
     FILTERS,
     PAGINATION,
     REQUEST_BEHAVIOUR,
     HEADERS,
 )
+
 
 
 def build_params(
@@ -37,7 +39,7 @@ def fetch_units_page(
     offset: int,
 ) -> Dict:
     response = requests.get(
-        API_URL,
+        UNITS_API_URL,
         params=build_params(
             check_in=check_in,
             check_out=check_out,
@@ -104,3 +106,22 @@ def fetch_all_units(
 
     return list(all_units.values())
 
+
+def fetch_properties() -> List[Dict]:
+    """
+    Fetch properties using same filters as units.
+    """
+    response = requests.get(
+        PROPERTIES_API_URL,
+        params={
+            "layouts": ",".join(FILTERS["layouts"]),
+            "min_price": FILTERS["min_price"],
+            "max_price": FILTERS["max_price"],
+            "gcc_id": FILTERS["gcc_id"],
+        },
+        headers=HEADERS,
+        timeout=30,
+    )
+
+    response.raise_for_status()
+    return response.json()
