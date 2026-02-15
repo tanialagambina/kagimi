@@ -18,7 +18,7 @@ FILTERS = {
 MAIN_CHECK_IN = date.fromisoformat("2026-10-01")
 CHECK_OUT = "2027-03-29"
 
-SUGGESTION_WINDOW_DAYS = 15  # 1 week
+SUGGESTION_WINDOW_DAYS = 21  # 3 weeks
 
 QUERIES = []
 

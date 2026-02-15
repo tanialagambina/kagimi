@@ -9,6 +9,8 @@ from src.emailer import send_email
 # --------------------------------------------------
 
 DB_PATH = Path("out/hmlet_units.sqlite")
+SEPARATOR = "────────────────────────\n"
+SUB_SEPARATOR = "· · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · ·\n"
 
 
 # --------------------------------------------------
@@ -204,40 +206,39 @@ def build_alert_message(
 ) -> str:
     lines = []
 
-    lines.append("HMLET ALERTS\n")
-    lines.append(f"Previous run: {previous_dt}")
-    lines.append(f"Latest run:   {latest_dt}\n")
+    lines.append("🗼 HMLET Alerts")
+    lines.append("Here are the latest updates on your tracked properties:\n")
 
     # ---------------- MAIN QUERY ----------------
 
     if new_units:
-        lines.append("✨ NEW UNITS detected in your time range ✨\n")
+        lines.append("✨ New units have been detected in your time range ✨\n")
         for uid in sorted(new_units):
             u = latest[uid]
             url = build_unit_url(
                 u["property_id"], uid, primary_check_in, primary_check_out
             )
             lines.append(
-                f"+ [Unit {uid}] {u['property_name_en']} | {u['layout']} | "
-                f"{u['size_square_meters']} m² | {u['city_en']} | ¥{u['price_jpy']:,}\n"
-                f"  👀➡️ {url}\n"
+                f"▪ [Unit {uid}] {u['property_name_en']} | {u['layout']} | "
+                f"{u['size_square_meters']} m² | {u['city_en']} | 💴 ¥{u['price_jpy']:,}\n"
+                f"  ➡️ {url}\n"
             )
 
     if removed_units:
-        lines.append("❌ REMOVED UNITS detected in your time range\n")
+        lines.append("❌ Removed units have been detected in your time range:\n")
         for uid in sorted(removed_units):
             u = previous[uid]
             url = build_unit_url(
                 u["property_id"], uid, primary_check_in, primary_check_out
             )
             lines.append(
-                f"- [Unit {uid}] {u['property_name_en']} | {u['layout']} | "
-                f"{u['size_square_meters']} m² | {u['city_en']} | ¥{u['price_jpy']:,}\n"
-                f"  👀➡️ {url}\n"
+                f"▪ [Unit {uid}] {u['property_name_en']} | {u['layout']} | "
+                f"{u['size_square_meters']} m² | {u['city_en']} | 💴 ¥{u['price_jpy']:,}\n"
+                f"  ➡️ {url}\n"
             )
 
     if price_changes:
-        lines.append("💰 PRICE CHANGES detected in your time range\n")
+        lines.append("💰 Price changes have been detected in your time range:\n")
         for uid in sorted(price_changes):
             l = latest[uid]
             p = previous[uid]
@@ -248,8 +249,8 @@ def build_alert_message(
             lines.append(
                 f"{arrow} [Unit {uid}] {l['property_name_en']} | {l['layout']} | "
                 f"{l['size_square_meters']} m² | "
-                f"¥{p['price_jpy']:,} → ¥{l['price_jpy']:,}\n"
-                f"  👀➡️ {url}\n"
+                f"💴 ¥{p['price_jpy']:,} → 💴 ¥{l['price_jpy']:,}\n"
+                f"  ➡️ {url}\n"
             )
 
     if not (new_units or removed_units or price_changes):
@@ -258,19 +259,19 @@ def build_alert_message(
     # ---------------- SECONDARY SUGGESTIONS ----------------
 
     if new_suggestions:
-        lines.append(
-            "💡 Have you also considered these properties?\nThey have just become available if you start your lease slightly earlier:\n"
-        )
+        lines.append("💡 Have you also considered these properties?")
+        lines.append("They are available if you start your lease slightly earlier!")
+        lines.append("ℹ️ You can pay for the extra days at the start of the lease, but physically move in on your preferred date.\n")
         for s in new_suggestions.values():
             delta = days_earlier(primary_check_in, s["check_in_date"])
             url = build_unit_url(
                 s["property_id"], s["unit_id"], s["check_in_date"], primary_check_out
             )
             lines.append(
-                f"+ [Unit {s['unit_id']}] {s['property_name_en']} | {s['layout']} | "
-                f"{s['size_square_meters']} m² | {s['city_en']} | ¥{s['price_jpy']:,}\n"
+                f"▪ [Unit {s['unit_id']}] {s['property_name_en']} | {s['layout']} | "
+                f"{s['size_square_meters']} m² | {s['city_en']} | 💴 ¥{s['price_jpy']:,}\n"
                 f"  → {delta} days earlier ({s['check_in_date']})\n"
-                f"  👀➡️ {url}\n"
+                f"  ➡️ {url}\n"
             )
 
     if removed_suggestions:
@@ -280,9 +281,9 @@ def build_alert_message(
                 s["property_id"], s["unit_id"], s["check_in_date"], primary_check_out
             )
             lines.append(
-                f"- [Unit {s['unit_id']}] {s['property_name_en']} | {s['layout']} | "
-                f"{s['size_square_meters']} m² | {s['city_en']} | ¥{s['price_jpy']:,}\n"
-                f"  👀➡️ {url}\n"
+                f"▪ [Unit {s['unit_id']}] {s['property_name_en']} | {s['layout']} | "
+                f"{s['size_square_meters']} m² | {s['city_en']} | 💴 ¥{s['price_jpy']:,}\n"
+                f"  ➡️ {url}\n"
             )
 
     if suggestion_price_changes:
@@ -295,9 +296,14 @@ def build_alert_message(
             lines.append(
                 f"{arrow} [Unit {l['unit_id']}] {l['property_name_en']} | {l['layout']} | "
                 f"{l['size_square_meters']} m²\n"
-                f"  ¥{p['price_jpy']:,} → ¥{l['price_jpy']:,}\n"
-                f"  👀➡️ {url}\n"
+                f" 💴 ¥{p['price_jpy']:,} → ¥{l['price_jpy']:,}\n"
+                f"  ➡️ {url}\n"
             )
+
+    lines.append(SUB_SEPARATOR)
+    lines.append(f"Snapshot taken at: {latest_dt}\n")
+    lines.append("Generated by your friendly Hmlet unit availability bot 🤖\n")
+    lines.append("Have a great day! 🌞\n")
 
     return "\n".join(lines)
 
