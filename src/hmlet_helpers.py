@@ -117,7 +117,8 @@ def fetch_units_for_snapshot(conn, snapshot_datetime: str, query_id: int):
             u.property_name_en,
             u.layout,
             u.city_en,
-            u.size_square_meters
+            u.size_square_meters,
+            u.unit_number
         FROM availability_snapshots s
         JOIN units u ON u.unit_id = s.unit_id
         WHERE s.snapshot_datetime = ?
@@ -141,6 +142,7 @@ def fetch_secondary_only_units_for_snapshot(
             u.layout,
             u.city_en,
             u.size_square_meters,
+            u.unit_number,
             s.price_jpy,
             MAX(q.check_in_date) AS check_in_date
         FROM availability_snapshots s
