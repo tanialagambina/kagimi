@@ -9,6 +9,8 @@ from src.hmlet_helpers import (
     fetch_properties_for_snapshot,
     compare_property_snapshots,
     build_all_unit_urls,
+    unit_floor,
+    ordinal,
     SUB_SEPARATOR,
     SEPARATOR,
 )
@@ -46,7 +48,7 @@ def build_property_alert_message(new_properties, latest, latest_dt):
             for unit, url in unit_urls:
                 lines.append(
                     f"▪ [Unit {unit['unit_id']}] "
-                    f"{unit['layout']} | 🔑 {unit['unit_number']} | {unit['size_square_meters']} m² | "
+                    f"{unit['layout']} | 🔑 {ordinal(unit_floor(unit['unit_number']))} floor | {unit['size_square_meters']} m² | "
                     f"💴 ¥{unit['list_price']:,}\n"
                     f"  ➡️ {url}\n"
                 )

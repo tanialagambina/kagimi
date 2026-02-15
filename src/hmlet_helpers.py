@@ -305,3 +305,33 @@ def fetch_properties_opened_this_week(conn):
         ORDER BY p.minimum_list_price ASC
         """
     ).fetchall()
+
+def unit_floor(unit_number):
+    """
+    Converts unit number → floor number.
+
+    Examples:
+    502 → 5
+    103 → 1
+    1003 → 10
+    """
+
+    if not unit_number:
+        return None
+
+    return int(str(unit_number)[:-2])
+
+def ordinal(n):
+    """
+    1 → 1st
+    2 → 2nd
+    3 → 3rd
+    """
+
+    if 10 <= n % 100 <= 20:
+        suffix = "th"
+    else:
+        suffix = {1: "st", 2: "nd", 3: "rd"}.get(n % 10, "th")
+
+    return f"{n}{suffix}"
+

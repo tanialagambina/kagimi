@@ -8,6 +8,8 @@ from src.hmlet_helpers import (
     fetch_secondary_only_units_for_snapshot,
     fetch_properties_opened_this_week,
     build_all_unit_urls,
+    unit_floor,
+    ordinal,
     DB_PATH,
     SUB_SEPARATOR,
     SEPARATOR,
@@ -73,7 +75,7 @@ def build_roundup_message(
                 r["property_id"], r["unit_id"], primary_check_in, primary_check_out
             )
             lines.append(
-                f"▪ [Unit {r['unit_id']}] {r['property_name_en']} | {r['layout']} | 🔑 {r['unit_number']} | "
+                f"▪ [Unit {r['unit_id']}] {r['property_name_en']} | {r['layout']} | 🔑 {ordinal(unit_floor(r['unit_number']))} floor | "
                 f"{r['size_square_meters']} m² | {r['city_en']} | 💴 ¥{r['price_jpy']:,}\n"
                 f"  ➡️ {url}\n"
             )
@@ -106,7 +108,7 @@ def build_roundup_message(
                 r["property_id"], r["unit_id"], r["check_in_date"], primary_check_out
             )
             lines.append(
-                f"▪ [Unit {r['unit_id']}] {r['property_name_en']} | {r['layout']} | 🔑 {r['unit_number']} | "
+                f"▪ [Unit {r['unit_id']}] {r['property_name_en']} | {r['layout']} | 🔑 {ordinal(unit_floor(r['unit_number']))} floor | "
                 f"{r['size_square_meters']} m² | {r['city_en']} | 💴 ¥{r['price_jpy']:,}\n"
                 f"  📆 {delta} days earlier ({r['check_in_date']})\n"
                 f"  ➡️ {url}\n"
@@ -139,7 +141,7 @@ def build_roundup_message(
                     for unit, url in unit_urls:
                         lines.append(
                             f"▪ [Unit {unit['unit_id']}] "
-                            f"{unit['layout']} | 🔑 {unit['unit_number']} | {unit['size_square_meters']} m² | "
+                            f"{unit['layout']} | 🔑 {ordinal(unit_floor(unit['unit_number']))} floor | {unit['size_square_meters']} m² | "
                             f"💴 ¥{unit['list_price']:,}\n"
                             f"  ➡️ {url}\n"
                         )
