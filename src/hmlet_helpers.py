@@ -293,23 +293,27 @@ def fetch_properties_opened_this_week(conn):
 
     return conn.execute(
         """
-        SELECT DISTINCT
+        SELECT
             p.property_id,
             p.property_name_en,
             p.property_name_ja,
-            p.available_room_count,
-            p.minimum_list_price
+            MAX(p.available_room_count) AS available_room_count,
+            MIN(p.minimum_list_price) AS minimum_list_price
         FROM property_snapshots p
 
-        WHERE p.snapshot_datetime >= datetime('now', '-7 days')
+        WHERE p.property_id IN (
+            SELECT property_id
+            FROM property_snapshots
+            GROUP BY property_id
+            HAVING MIN(snapshot_datetime) >= datetime('now', '-7 days')
+        )
 
-          AND p.property_id NOT IN (
-              SELECT property_id
-              FROM property_snapshots
-              WHERE snapshot_datetime < datetime('now', '-7 days')
-          )
+        GROUP BY
+            p.property_id,
+            p.property_name_en,
+            p.property_name_ja
 
-        ORDER BY p.minimum_list_price ASC
+        ORDER BY p.property_id ASC
         """
     ).fetchall()
 
