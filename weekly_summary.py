@@ -125,8 +125,8 @@ def build_roundup_message(
                 "they're worth keeping an eye on as there could be soon!\n"
             )
 
-            for p in sorted(new_properties_this_week, key=lambda r: r["minimum_list_price"]):
-
+            for p in new_properties_this_week:
+                
                 units = fetch_units_for_property(p["property_id"])
                 unit_urls = build_all_unit_urls(units)
                 unit_urls = sorted(unit_urls, key=lambda x: x[0]["list_price"])
