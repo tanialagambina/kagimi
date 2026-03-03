@@ -3,15 +3,25 @@ from pathlib import Path
 
 UNITS_API_URL = "https://ywzjnepacv.ap-northeast-1.awsapprunner.com/v1/units"
 
-PROPERTIES_API_URL = "https://ywzjnepacv.ap-northeast-1.awsapprunner.com/v1/properties/location"
+PROPERTIES_API_URL = (
+    "https://ywzjnepacv.ap-northeast-1.awsapprunner.com/v1/properties/location"
+)
 
 FILTERS = {
     "layouts": [
-        "1LDK","2LDK","3LDK","1DK","1DKS","2K","2DK","3K","3DK",
+        "1LDK",
+        "2LDK",
+        "3LDK",
+        "1DK",
+        "1DKS",
+        "2K",
+        "2DK",
+        "3K",
+        "3DK",
     ],
     "min_price": 95_000,
     "max_price": 380_000,
-    "gcc_id": 101, # Tokyo
+    "gcc_id": 101,  # Tokyo
     "size_square_meters_min": 34,
     "size_square_meters_max": None,
 }
@@ -25,22 +35,26 @@ SUGGESTION_WINDOW_DAYS = 30  # 1 month
 QUERIES = []
 
 # Primary query
-QUERIES.append({
-    "name": "main",
-    "check_in": MAIN_CHECK_IN.isoformat(),
-    "check_out": CHECK_OUT,
-    "is_primary": True,
-})
+QUERIES.append(
+    {
+        "name": "main",
+        "check_in": MAIN_CHECK_IN.isoformat(),
+        "check_out": CHECK_OUT,
+        "is_primary": True,
+    }
+)
 
 # Secondary queries: day -1 to day -14
 for delta in range(1, SUGGESTION_WINDOW_DAYS + 1):
     d = MAIN_CHECK_IN - timedelta(days=delta)
-    QUERIES.append({
-        "name": f"minus_{delta}_days",
-        "check_in": d.isoformat(),
-        "check_out": CHECK_OUT,
-        "is_primary": False,
-    })
+    QUERIES.append(
+        {
+            "name": f"minus_{delta}_days",
+            "check_in": d.isoformat(),
+            "check_out": CHECK_OUT,
+            "is_primary": False,
+        }
+    )
 
 PAGINATION = {
     "limit": 12,
@@ -58,9 +72,7 @@ SNAPSHOT_DATETIME = datetime.now(timezone.utc).isoformat(timespec="seconds")
 OUTPUT_DIR = Path("out")
 OUTPUT_DIR.mkdir(exist_ok=True)
 TODAY_DATE = date.today()
-TODAY_DATETIME = datetime.combine(
-    TODAY_DATE, datetime.min.time()
-).isoformat()
+TODAY_DATETIME = datetime.combine(TODAY_DATE, datetime.min.time()).isoformat()
 
 
 OUTPUT_CSV = OUTPUT_DIR / f"hmlet_units_{TODAY_DATE.isoformat()}.csv"

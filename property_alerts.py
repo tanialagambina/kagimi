@@ -17,8 +17,6 @@ from src.hmlet_helpers import (
     BOT_SIGN_OFF,
 )
 
-
-
 # --------------------------------------------------
 # OUTPUT
 # --------------------------------------------------
@@ -27,9 +25,7 @@ from src.hmlet_helpers import (
 def build_property_alert_message(new_properties, latest, latest_dt):
     lines = []
     lines.append("🗼🎉 New buildings opened in Tokyo!")
-    lines.append(
-        "These buildings have just opened — explore available units:\n"
-    )
+    lines.append("These buildings have just opened — explore available units:\n")
     lines.append(SUB_SEPARATOR)
 
     for pid in sorted(new_properties):
@@ -67,16 +63,14 @@ def build_property_alert_message(new_properties, latest, latest_dt):
     return "\n".join(lines)
 
 
-
-
 # --------------------------------------------------
 # MAIN
 # --------------------------------------------------
 
+
 def main():
     conn = get_connection()
     initialise_schema(conn)
-
 
     snapshot_dt = datetime.utcnow().isoformat()
 

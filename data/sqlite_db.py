@@ -5,7 +5,6 @@ from src.config import DB_PATH, SNAPSHOT_DATETIME
 from src.parsing import parse_lat_lon, parse_date_to_datetime
 
 
-
 def get_connection():
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
@@ -14,8 +13,7 @@ def get_connection():
 
 
 def init_db(conn: sqlite3.Connection):
-    conn.executescript(
-        """
+    conn.executescript("""
         CREATE TABLE IF NOT EXISTS units (
             unit_id INTEGER PRIMARY KEY,
             property_id INTEGER,
@@ -51,8 +49,7 @@ def init_db(conn: sqlite3.Connection):
             check_out_date DATE NOT NULL,
             is_primary BOOLEAN NOT NULL
         );
-        """
-    )
+        """)
 
 
 def upsert_units(conn: sqlite3.Connection, units: List[Dict]):
@@ -79,20 +76,22 @@ def upsert_units(conn: sqlite3.Connection, units: List[Dict]):
     rows = []
     for u in units:
         lat, lon = parse_lat_lon(u["coordinates"])
-        rows.append((
-            u["unit_id"],
-            u["property_id"],
-            u["property_name_en"],
-            u["property_name_ja"],
-            u.get("unit_number"),
-            u["layout"],
-            u["size_square_meters"],
-            u["city_en"],
-            u["city_ja"],
-            u["coordinates"],
-            lat,
-            lon,
-        ))
+        rows.append(
+            (
+                u["unit_id"],
+                u["property_id"],
+                u["property_name_en"],
+                u["property_name_ja"],
+                u.get("unit_number"),
+                u["layout"],
+                u["size_square_meters"],
+                u["city_en"],
+                u["city_ja"],
+                u["coordinates"],
+                lat,
+                lon,
+            )
+        )
 
     conn.executemany(sql, rows)
 
@@ -136,7 +135,6 @@ def upsert_snapshots(
     conn.executemany(sql, rows)
 
 
-
 def get_or_create_query(
     conn: sqlite3.Connection,
     name: str,
@@ -176,4 +174,3 @@ def get_or_create_query(
     )
 
     return cursor.lastrowid
-

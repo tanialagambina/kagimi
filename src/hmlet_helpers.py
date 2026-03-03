@@ -3,11 +3,9 @@ from pathlib import Path
 from datetime import date, datetime
 from urllib.parse import quote_plus
 
-
-
-#--------------------------------------------------
+# --------------------------------------------------
 # CONFIG & CONSTANTS
-#--------------------------------------------------
+# --------------------------------------------------
 
 DB_PATH = Path("out/hmlet_units.sqlite")
 SEPARATOR = "────────────────────────\n"
@@ -23,7 +21,10 @@ BOT_SIGN_OFF = (
 # URL HELPERS
 # --------------------------------------------------
 
-def build_unit_url(property_id: int, unit_id: int, check_in: str, check_out: str) -> str:
+
+def build_unit_url(
+    property_id: int, unit_id: int, check_in: str, check_out: str
+) -> str:
     return (
         f"https://hmlet.com/en/property/{property_id}/units/{unit_id}/detail"
         f"?check_in={check_in}&check_out={check_out}"
@@ -34,6 +35,7 @@ def days_earlier(primary_check_in: str, suggested_check_in: str) -> int:
     primary = date.fromisoformat(primary_check_in)
     suggested = date.fromisoformat(suggested_check_in)
     return (primary - suggested).days
+
 
 def most_expensive_unit_url(units, check_in=None, check_out=None):
     """
@@ -59,6 +61,7 @@ def most_expensive_unit_url(units, check_in=None, check_out=None):
         f"https://hmlet.com/en/property/{unit['property_id']}"
         f"/units/{unit['unit_id']}/detail"
     )
+
 
 def build_all_unit_urls(units, check_in=None, check_out=None):
     """
@@ -92,10 +95,10 @@ def build_all_unit_urls(units, check_in=None, check_out=None):
     return urls
 
 
-
 # --------------------------------------------------
 # DB HELPERS
 # --------------------------------------------------
+
 
 def get_connection():
     conn = sqlite3.connect(DB_PATH)
@@ -105,13 +108,11 @@ def get_connection():
 
 
 def get_primary_query(conn):
-    return conn.execute(
-        """
+    return conn.execute("""
         SELECT query_id, check_in_date, check_out_date
         FROM queries
         WHERE is_primary = 1
-        """
-    ).fetchone()
+        """).fetchone()
 
 
 def fetch_units_for_snapshot(conn, snapshot_datetime: str, query_id: int):
@@ -168,9 +169,11 @@ def fetch_secondary_only_units_for_snapshot(
         (snapshot_datetime, snapshot_datetime, primary_query_id),
     ).fetchall()
 
+
 # --------------------------------------------------
 # SCHEMA MANAGEMENT
 # --------------------------------------------------
+
 
 def initialise_schema(conn):
     """
@@ -178,8 +181,7 @@ def initialise_schema(conn):
     Safe to run every time.
     """
 
-    conn.execute(
-        """
+    conn.execute("""
         CREATE TABLE IF NOT EXISTS property_snapshots (
             snapshot_datetime TEXT,
             property_id INTEGER,
@@ -190,8 +192,7 @@ def initialise_schema(conn):
 
             PRIMARY KEY (snapshot_datetime, property_id)
         )
-        """
-    )
+        """)
 
     conn.commit()
 
@@ -199,6 +200,7 @@ def initialise_schema(conn):
 # --------------------------------------------------
 # PROPERTY SNAPSHOT HELPERS
 # --------------------------------------------------
+
 
 def insert_property_snapshot(conn, snapshot_dt, properties):
     conn.executemany(
@@ -229,14 +231,12 @@ def insert_property_snapshot(conn, snapshot_dt, properties):
 
 
 def get_last_two_property_snapshots(conn):
-    rows = conn.execute(
-        """
+    rows = conn.execute("""
         SELECT DISTINCT snapshot_datetime
         FROM property_snapshots
         ORDER BY snapshot_datetime DESC
         LIMIT 2
-        """
-    ).fetchall()
+        """).fetchall()
 
     if len(rows) < 2:
         return None, None
@@ -256,9 +256,11 @@ def fetch_properties_for_snapshot(conn, snapshot_dt):
 
     return {row["property_id"]: row for row in rows}
 
+
 # --------------------------------------------------
 # SORTING
 # --------------------------------------------------
+
 
 def sort_secondary_rows(rows, primary_check_in):
     return sorted(
@@ -270,9 +272,11 @@ def sort_secondary_rows(rows, primary_check_in):
         ),
     )
 
+
 # --------------------------------------------------
 # PROPERTY DIFF LOGIC
 # --------------------------------------------------
+
 
 def compare_property_snapshots(latest, previous):
     latest_ids = set(latest.keys())
@@ -282,17 +286,18 @@ def compare_property_snapshots(latest, previous):
 
     return new_properties
 
+
 # --------------------------------------------------
 # WEEKLY PROPERTY DISCOVERY
 # --------------------------------------------------
+
 
 def fetch_properties_opened_this_week(conn):
     """
     Properties that appeared for the first time in the last 7 days.
     """
 
-    return conn.execute(
-        """
+    return conn.execute("""
         SELECT
             p.property_id,
             p.property_name_en,
@@ -314,8 +319,8 @@ def fetch_properties_opened_this_week(conn):
             p.property_name_ja
 
         ORDER BY p.property_id ASC
-        """
-    ).fetchall()
+        """).fetchall()
+
 
 def unit_floor(unit_number):
     """
@@ -361,6 +366,7 @@ def ordinal(n):
         suffix = {1: "st", 2: "nd", 3: "rd"}.get(n % 10, "th")
 
     return f"{n}{suffix}"
+
 
 def filter_out_first_floor(rows, debug=False):
 

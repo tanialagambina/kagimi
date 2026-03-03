@@ -25,14 +25,12 @@ from src.api import fetch_units_for_property
 
 
 def get_latest_snapshot_datetime(conn):
-    row = conn.execute(
-        """
+    row = conn.execute("""
         SELECT snapshot_datetime
         FROM availability_snapshots
         ORDER BY snapshot_datetime DESC
         LIMIT 1
-        """
-    ).fetchone()
+        """).fetchone()
     return row["snapshot_datetime"] if row else None
 
 
@@ -126,11 +124,10 @@ def build_roundup_message(
             )
 
             for p in new_properties_this_week:
-                
+
                 units = fetch_units_for_property(p["property_id"])
                 unit_urls = build_all_unit_urls(units)
                 unit_urls = sorted(unit_urls, key=lambda x: x[0]["list_price"])
-
 
                 maps_link = build_google_maps_search(p["property_name_en"])
 
@@ -142,7 +139,9 @@ def build_roundup_message(
                 )
 
                 if not unit_urls:
-                    lines.append("  (No units currently available for selected filters)\n")
+                    lines.append(
+                        "  (No units currently available for selected filters)\n"
+                    )
                 else:
                     for unit, url in unit_urls:
                         lines.append(
@@ -154,12 +153,9 @@ def build_roundup_message(
 
                 lines.append(SEPARATOR)
 
-
-
     lines.append(SUB_SEPARATOR)
     lines.append(f"Snapshot taken at: {snapshot_dt}\n")
     lines.append(BOT_SIGN_OFF)
-
 
     return "\n".join(lines)
 
@@ -197,9 +193,7 @@ def main():
     )
 
     secondary_units = filter_out_first_floor(
-        fetch_secondary_only_units_for_snapshot(
-            conn, snapshot_dt, primary_query_id
-        )
+        fetch_secondary_only_units_for_snapshot(conn, snapshot_dt, primary_query_id)
     )
 
     new_properties_this_week = fetch_properties_opened_this_week(conn)

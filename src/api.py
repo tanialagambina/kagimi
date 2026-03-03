@@ -13,7 +13,6 @@ from src.config import (
 )
 
 
-
 def build_params(
     *,
     check_in: str,
@@ -126,6 +125,7 @@ def fetch_properties() -> List[Dict]:
     response.raise_for_status()
     return response.json()
 
+
 def fetch_units_for_property(property_id):
     response = requests.get(
         UNITS_API_URL,
@@ -145,4 +145,3 @@ def fetch_units_for_property(property_id):
 
     response.raise_for_status()
     return response.json().get("items", [])
-

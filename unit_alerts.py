@@ -1,4 +1,3 @@
-
 from src.emailer import send_email
 from src.hmlet_helpers import (
     get_connection,
@@ -16,20 +15,18 @@ from src.hmlet_helpers import (
     BOT_SIGN_OFF,
 )
 
-
-#--------------------------------------------------
+# --------------------------------------------------
 # SNAPSHOT HELPERS
-#--------------------------------------------------
+# --------------------------------------------------
+
 
 def get_last_two_snapshots(conn):
-    rows = conn.execute(
-        """
+    rows = conn.execute("""
         SELECT DISTINCT snapshot_datetime
         FROM availability_snapshots
         ORDER BY snapshot_datetime DESC
         LIMIT 2
-        """
-    ).fetchall()
+        """).fetchall()
 
     if len(rows) < 2:
         return None, None
@@ -93,7 +90,6 @@ def diff_secondary_suggestions(
     ]
 
     return new_units, removed_units, price_changes
-
 
 
 # --------------------------------------------------
@@ -175,7 +171,9 @@ def build_alert_message(
     if new_suggestions:
         lines.append("💡 Have you also considered these properties?")
         lines.append("They are available if you start your lease slightly earlier!")
-        lines.append("ℹ️ You can pay for the extra days at the start of the lease, but physically move in on your preferred date.\n")
+        lines.append(
+            "ℹ️ You can pay for the extra days at the start of the lease, but physically move in on your preferred date.\n"
+        )
         sorted_new = sort_secondary_rows(
             new_suggestions.values(),
             primary_check_in,
@@ -236,7 +234,6 @@ def build_alert_message(
     lines.append(f"Snapshot taken at: {latest_dt}\n")
     lines.append(BOT_SIGN_OFF)
 
-
     return "\n".join(lines)
 
 
@@ -277,7 +274,6 @@ def main():
     latest = {row["unit_id"]: row for row in latest_rows}
     previous = {row["unit_id"]: row for row in previous_rows}
 
-
     new_units, removed_units, price_changes = compare_snapshots(latest, previous)
 
     latest_suggestions = filter_out_first_floor(
@@ -298,16 +294,17 @@ def main():
         latest_main_units=set(latest.keys()),
     )
 
-
     # FIX: explicit single gate for email sending
-    changes_detected = any([
-        new_units,
-        removed_units,
-        price_changes,
-        new_suggestions,
-        removed_suggestions,
-        suggestion_price_changes,
-    ])
+    changes_detected = any(
+        [
+            new_units,
+            removed_units,
+            price_changes,
+            new_suggestions,
+            removed_suggestions,
+            suggestion_price_changes,
+        ]
+    )
 
     if not changes_detected:
         print("No changes detected — email not sent.")
